@@ -1,9 +1,11 @@
 import Status from "./index";
+import { joinRoom } from "./user";
+import axios from "axios";
 
 /********************************* ACTIONS ***********************************/
 
 const SET_STATUS = "SET_STATUS";
-const SET_JOINCODE = "SET_JOINCODE";
+const UPDATE_ROOM = "UPDATE_ROOM";
 
 // ACTION CREATORS
 /**
@@ -22,20 +24,59 @@ function setRoomStatus(statusCode, message) {
   };
 }
 
-function updateRoom(joinCode) {
+function updateRoom(room) {
   return {
-    type: SET_JOINCODE,
-    payload: joinCode
+    type: UPDATE_ROOM,
+    payload: room
   };
 }
 
 /********************************* THUNKS ***********************************/
 
-export function connectRoom() {
+/**
+ * This action will refresh data about the room. You must provide the joinCode
+ * to specify which room to get information about. This is because there is
+ * no way to get the current redux state inside this function.
+ * @param joinCode  the room's identifier
+ * @param refresh   true if this is just a refresh of a room already joined,
+ *                  false if connecting for the first time
+ */
+export function getRoomData(joinCode, refresh) {
   return function(dispatch) {
-    //dispatch(setStatus(LOADING, "Logging in..."))
-    //axios.post().then(res => {dispatch(setStatus(CONNECTED, ""))})
+    if(!refresh)
+      dispatch(setRoomStatus(Status.CONNECTING, "Loading Players..."));
+    else
+      dispatch(setRoomStatus(Status.REFRESHING, "Fetching Changes..."));
+    axios.get("/api/game_info", {
+      params: {id: joinCode}
+    })
+    .then(function(response) {
+      dispatch(updateRoom(response))
+    })
+    .catch(function(error) {
+      dispatch(setRoomStatus(Status.ERROR, "Failed to join game"));
+    });
   };
+}
+
+/**
+ * Ask the server to create a new room/game. The server will respond with the
+ * room code (join code) of the new room. This user should then try to connect
+ * to the room to become the host.
+ * @param socket  a socketIO client that will connect to the room once it is
+ *                created.
+ */
+export function createRoom(socket) {
+  return function(dispatch) {
+    dispatch(setRoomStatus(Status.CREATING, "Creating game..."));
+    axios.post("/api/new_game")
+    .then(function(response) {
+      joinRoom(socket, response.join_code);
+    })
+    .catch(function(error) {
+      dispatch(setRoomStatus(Status.ERROR, "Couldn't create game at this time. Please try later."));
+    });
+  }
 }
 
 /********************************* REDUCER ***********************************/
@@ -59,10 +100,8 @@ export default function roomReducer(state = initialState, action) {
         status: action.status,
         message: action.message
       });
-    case SET_JOINCODE:
-      return Object.assign({}, state, {
-        joinCode: action.payload
-      });
+    case UPDATE_ROOM:
+      return Object.assign({}, state, action.payload);
     default:
       return state;
   }

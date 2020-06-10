@@ -1,4 +1,5 @@
 import Status from "./index";
+import { getRoomData } from "./room";
 
 /********************************* ACTIONS ***********************************/
 
@@ -31,10 +32,18 @@ function updatePlayer(playerID) {
 
 /********************************* THUNKS ***********************************/
 
-export function connect() {
+export function joinRoom(socket, joinCode) {
   return function(dispatch) {
-    //dispatch(setStatus(LOADING, "Logging in..."))
-    //axios.post().then(res => {dispatch(setStatus(CONNECTED, ""))})
+    dispatch(setStatus(Status.CONNECTING, "Joining Game"));
+    socket.emit("request_join", joinCode, (joined, playerID) => {
+      if(joined) {
+        dispatch(setStatus(Status.CONNECTED, "Loading Players"));
+        dispatch(updatePlayer(playerID));
+        dispatch(getRoomData(joinCode));
+      } else {
+        dispatch(setStatus(Status.ERROR, "Couldn't join game. The game may be full, or it may have already started, or you may have mistyped the code."));
+      }
+    });
   };
 }
 
