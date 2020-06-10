@@ -28,6 +28,10 @@ game.on("connect", function(socket) {
 	});
 });
 
+//Mount our API routes
+const apiRouter = require("./routes/room");
+app.use("/api", apiRouter);
+
 app.get("/", (req, res) => {
 	console.log("GET /");
 	res.send("Hello World\n");
