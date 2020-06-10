@@ -1,0 +1,23 @@
+{
+  "name": "settlers-marina-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "implements socketio server-side logic",
+  "main": "app.js",
+  "scripts": {
+    "dev": "echo 'starting development server'; nodemon -r dotenv/config ./bin/www",
+    "start": "echo 'starting production server'; nodemon ./bin/www"
+  },
+  "author": "Max",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "nodemon": "^2.0.4",
+    "path": "^0.12.7",
+    "socket.io": "^2.3.0"
+  }
+}

@@ -1,0 +1,33 @@
+#!/usr/bin/env node
+
+const app = require("../app");
+
+// Event listener for HTTP server "error" event;
+const onError = error => {
+  if (error.syscall !== 'listen') throw error;
+
+  const bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  switch (error.code) { // Handle specific listen errors with friendly messages;
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+//start the server
+const port = process.env.PORT || 3001;
+app.listen(port, () => {
+	console.log("Server is listening on port " + port);
+});
+//If the server fails to start up
+app.on("error", onError);
