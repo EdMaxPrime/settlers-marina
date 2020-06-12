@@ -1,0 +1,32 @@
+.menu-container {
+	border-radius: 20px;
+	width: 500px;
+	margin: 1em auto;
+	padding: 20px;
+	color: white;
+	background-color: #068D9D;
+}
+
+input[type="text"] {
+	margin-left: 2em;
+	background: transparent;
+	border: none;
+	border-bottom: 1px solid white;
+	outline: none;
+	color: white;
+	font-size: 1em;
+}
+
+.menu-container button {
+	background-color: #80DED9;
+	color: black;
+	border-radius: 0px;
+	border: none;
+	font-size: 1em;
+	padding: 5px 10px;
+}
+
+/*#6D9C5 is another color*/
+.menu-container button:hover {
+	background-color: #AEEAE7;
+}
