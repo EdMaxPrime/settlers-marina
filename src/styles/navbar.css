@@ -1,0 +1,14 @@
+.navbar {
+	padding: 10px;
+	font-size: 2em;
+	background-color: #349;
+	color: white;
+}
+
+.navbar-left {
+	float: left;
+}
+
+.navbar-right {
+	float: right;
+}

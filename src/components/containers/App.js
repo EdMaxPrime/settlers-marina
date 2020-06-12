@@ -1,5 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import io from "socket.io-client";
+
+import Navbar from "../views/Navbar.js"
 import '../../styles/App.css';
 
 //global variable to store our client's connection to server
@@ -63,7 +65,7 @@ class App extends Component {
   render() {
     const mainMenu = (
       <Fragment>
-        <h1>Settlers of Marina</h1>
+        <Navbar />
         <div>
           <label htmlFor="joinCode">Enter your friend's join code</label>
           <input type="text" id="joinCode" onChange={this.handleJoinCodeChange} />
