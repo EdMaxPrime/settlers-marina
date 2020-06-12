@@ -1,7 +1,8 @@
 import React, { Component, Fragment } from 'react';
 import io from "socket.io-client";
 
-import Navbar from "../views/Navbar.js"
+import Navbar from "../views/Navbar"
+import JoinMenu from "./JoinMenu";
 import '../../styles/App.css';
 
 //global variable to store our client's connection to server
@@ -63,41 +64,11 @@ class App extends Component {
     socket.disconnect();
   }
   render() {
-    const mainMenu = (
-      <Fragment>
-        <Navbar />
-        <div>
-          <label htmlFor="joinCode">Enter your friend's join code</label>
-          <input type="text" id="joinCode" onChange={this.handleJoinCodeChange} />
-          <button onClick={this.handleJoinRequest}>Join</button>
-        </div>
-        <p>Or...</p>
-        <button>Create Game</button> 
-      </Fragment>
-      );
-    const connecting = (<h1>Connecting...</h1>);
-    const creating = (<h1>Creating Game...</h1>);
-    const lobby = (
-      <div>Lobby</div>
-      );
-    let view;
-    switch(this.state.view) {
-      case "main":
-        view = mainMenu;
-        break;
-      case "connecting":
-        view = connecting;
-        break;
-      case "creating":
-        view = creating;
-        break;
-      case "lobby":
-        view = lobby;
-      default:
-        view = mainMenu; //replace with <Game />
-    }
     return (
-      <div className="App">{view}</div>
+      <div className="App">
+        <Navbar />
+        {this.state.view == "main" && (<JoinMenu socket={socket} changeView={this.handleViewChange} />)}
+      </div>
     );
   }
 }
