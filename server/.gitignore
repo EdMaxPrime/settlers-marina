@@ -1,0 +1,11 @@
+# Ignore this node file
+package-lock.json
+
+# Ignore vendor code from installed packages
+node_modules/
+
+# Ignore database files
+*.sqlite3
+
+# Ignore Max OSX metadata files
+.DS_STORE
