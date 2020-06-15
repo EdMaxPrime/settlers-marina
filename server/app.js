@@ -3,10 +3,12 @@ const express = require("express");
 const session = require("express-session");
 const cors = require("cors");
 const path = require("path");
+const bodyParser = require("body-parser");
 const io = require("socket.io");
 
 //this is the application/server object
 const app = express();
+app.use(bodyParser.json());
 const server = http.createServer(app);
 var socketio = io(server);
 const game = socketio.of("/settlers");
