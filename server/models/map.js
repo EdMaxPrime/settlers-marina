@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     difficulty: DataTypes.INTEGER,
     description: DataTypes.STRING,
     thumbnail: DataTypes.BLOB,
-    map_data: DataTypes.STRING
+    map_data: DataTypes.JSON
   }, {});
   Map.associate = function(models) {
     // associations can be defined here

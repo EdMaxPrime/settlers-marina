@@ -25,7 +25,7 @@ module.exports = {
         type: Sequelize.BLOB
       },
       map_data: {
-        type: Sequelize.STRING
+        type: Sequelize.JSON
       },
       createdAt: {
         allowNull: false,
