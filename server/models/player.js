@@ -2,7 +2,13 @@
 module.exports = (sequelize, DataTypes) => {
   const Player = sequelize.define('Player', {
     socket_id: DataTypes.TEXT,
-    room_code: DataTypes.STRING,
+    room_code: {
+      type: DataTypes.STRING,
+      references: {
+        model: "Games",
+        key: "join_code"
+      }
+    },
     player_id: DataTypes.INTEGER,
     nickname: DataTypes.STRING,
     color: DataTypes.STRING,
@@ -24,8 +30,9 @@ module.exports = (sequelize, DataTypes) => {
       fields: ["room_code", "player_id"]
     }
   });
+  /* Define associations here */
   Player.associate = function(models) {
-    // associations can be defined here
+    Player.belongsTo(models.Game);
   };
   return Player;
 };

@@ -11,10 +11,6 @@ module.exports = {
       socket_id: {
         type: Sequelize.TEXT
       },
-      room_code: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
       player_id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -44,11 +40,11 @@ module.exports = {
         type: Sequelize.DATE
       }
     }, {
-      uniqueKeys: { //all UNIQUE index definitions go here
-        playerInGame: { //index named "playerInGame" ensures player id's don't repeat in game
-          fields: ["room_code", "player_id"]
-        }
-      }
+      // uniqueKeys: { //all UNIQUE index definitions go here
+      //   playerInGame: { //index named "playerInGame" ensures player id's don't repeat in game
+      //     fields: ["room_code", "player_id"]
+      //   }
+      // }
     });
   },
   down: (queryInterface, Sequelize) => {

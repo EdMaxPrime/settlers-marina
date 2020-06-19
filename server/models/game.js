@@ -1,9 +1,11 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const Game = sequelize.define('Game', {
-    join_code: {
+    id: {
       type: DataTypes.STRING,
-      unique: true
+      primaryKey: true,
+      allowNull: false,
+      autoIncrement: false
     },
     status: DataTypes.STRING,
     status_timestamp: DataTypes.DATE,
@@ -18,8 +20,10 @@ module.exports = (sequelize, DataTypes) => {
     longest_road: DataTypes.INTEGER,
     largest_army: DataTypes.INTEGER
   }, {});
+  /* Define associations here */
   Game.associate = function(models) {
-    // associations can be defined here
+    Game.hasMany(models.Player);
+    Game.belongsTo(models.Map);
   };
   return Game;
 };

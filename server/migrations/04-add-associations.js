@@ -2,19 +2,18 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    /* Player.room_code REFERENCES Game.join_code */
-    return queryInterface.addConstraint(
-      "Players", //name of source model's table
+    /* Player.GameId REFERENCES Game.id */
+    return queryInterface.addColumn(
+      "Players", //name of the table being edited (source)
+      "GameId",  //name of the column being added (foreign key)
       {
-        type: "foreign key",
-        fields: ["room_code"],
-        name: "one_game_many_players",
-        references: {
-          table: "Games",
-          field: "join_code"
+        type: Sequelize.STRING, //type of foreign key
+        references: {           //foreign key data
+          model: "Games",       //the target/owner of this Model
+          key: "id"             //the target/owner's identifier column
         },
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE"
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE"
       })
     /* Game.MapId REFERENCES Map.id */
     .then(() => {
@@ -34,9 +33,9 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    //get rid of foreign key
-    return queryInterface.removeConstraint("Players", "one_game_many_players")
-    //get rid of foreign key and column
+    //get rid of foreign key Player.belongsTo(Game) aka Game.hasMany(Player)
+    return queryInterface.removeColumn("Players", "GameId")
+    //get rid of foreign key Game.belongsTo(Map) aka Map.hasMany(Game)
     .then(() => {
       return queryInterface.removeColumn("Games", "MapId")
     })
