@@ -29,15 +29,48 @@ game.on("connect", function(socket) {
 		console.log(socket.id + " disconnecting");
 	});
 });
+const eventsRouter = require("./websocket");
+eventsRouter(game);
+
+/* Test Middleware */
+app.use(function(req, res, next) {
+	console.log("Middleware: ", req);
+	next();
+});
+
+/* Socketio middleware */
+app.use((req, res, next) => {
+	res.socketio = game;
+});
 
 //Mount our API routes
-const apiRouter = require("./routes/room");
+const apiRouter = require("./routes");
 app.use("/api", apiRouter);
 
 app.get("/", (req, res) => {
 	console.log("GET /");
 	res.send("Hello World\n");
 });
+
+/*
+ * ERROR HANDLING
+ */
+app.use((req, res, next) => {
+	//maybe they tried to access a file that doesn't exist (files have extensions)
+	if(path.extname(req.path).length) {
+		const err = new Error("File Not Found");
+		err.status = 404;
+		next(err);
+	} else {
+		next();
+	}
+});
+app.use((err, req, res, next) => {
+	console.log("Caught error");
+	console.error(err);
+	rest.status(err.status || 500).send(err.message || "Internal server error.");
+});
+/* ERROR HANDLING */
 
 //export the app so it can be used in the www file
 module.exports = server;
