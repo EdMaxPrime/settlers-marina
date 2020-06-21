@@ -4,11 +4,13 @@ const session = require("express-session");
 const cors = require("cors");
 const path = require("path");
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 const io = require("socket.io");
 
 //this is the application/server object
 const app = express();
 app.use(bodyParser.json());
+app.use(cookieParser());
 const server = http.createServer(app);
 var socketio = io(server);
 const game = socketio.of("/settlers");
@@ -32,15 +34,10 @@ game.on("connect", function(socket) {
 const eventsRouter = require("./websocket");
 eventsRouter(game);
 
-/* Test Middleware */
-app.use(function(req, res, next) {
-	console.log("Middleware: ", req);
-	next();
-});
-
 /* Socketio middleware */
 app.use((req, res, next) => {
-	res.socketio = game;
+	req.settlers = {ns: game, id: "/settlers#" + req.cookies.io};
+	next();
 });
 
 //Mount our API routes
