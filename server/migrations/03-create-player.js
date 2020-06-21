@@ -13,7 +13,7 @@ module.exports = {
       },
       player_id: {
         type: Sequelize.INTEGER,
-        autoIncrement: true,
+        defaultValue: 0,
         allowNull: false
       },
       nickname: {
