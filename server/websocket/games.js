@@ -1,6 +1,9 @@
+const {Player} = require("../models");
+
 module.exports = (server) => {
 	server.on("connect", (socket) => {
-		socket.on("player_join", (gameId, response) => {
+		socket.on("player_join", (gameId, playerID, response) => {
+			console.log("Player Join event gameId="+gameId+" playerID="+playerID);
 			//find in Players table
 			Player.findOne({where: {
 				socket_id: socket.id,
@@ -21,7 +24,7 @@ module.exports = (server) => {
 						response(false);
 					} else {
 						//send successful acknowledgment
-						response(true);
+						response(true, player.player_id);
 						//announce the arrival of this player
 						server.to(`${gameId} players`).emit("chat", {
 							type: "CHAT_INFO",
