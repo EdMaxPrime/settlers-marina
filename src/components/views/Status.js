@@ -15,10 +15,15 @@ import "../../styles/status.css";
  */
 function Status(props) {
   //if no status type is set, then don't render this component
-  if(!props.hasOwnProperty("type")) {
+  if(typeof props.type !== "string") {
     return null;
   }
-  let kind = props.type;
+  let kind = props.type.toLowerCase();
+  if(kind.endsWith("ing")) {
+    kind = "loading";
+  } else if(kind !== "success") {
+    kind = "error";
+  }
   let symbols = {
     success: "\u2713 ",
     error: "\u26a0 ",
@@ -31,7 +36,8 @@ function Status(props) {
   );
   let showStatusBox =
     !props.hasOwnProperty("hideStatus") ||
-    props.hideStatus.indexOf(props.type) === -1;
+    (props.hideStatus.indexOf(props.type) === -1 &&
+      props.hideStatus.indexOf(kind) === -1);
   return (
     <Fragment>
       {showStatusBox && statusBox}
