@@ -1,8 +1,8 @@
 /* This file contains constants for status codes */
-const ERROR = "ERROR";
-const CONNECTING = "CONNECTING";
-const CONNECTED = "CONNECTED";
-const DISCONNECTED = "DISCONNECTED";
-const CREATING = "LOADING";
-const LOADING = "LOADING";
-const REFRESHING = "LOADING";
+export const ERROR = "ERROR";
+export const CONNECTING = "CONNECTING";
+export const CONNECTED = "CONNECTED";
+export const DISCONNECTED = "DISCONNECTED";
+export const CREATING = "LOADING";
+export const LOADING = "LOADING";
+export const REFRESHING = "LOADING";

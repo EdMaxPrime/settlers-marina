@@ -1,4 +1,5 @@
-import Status from "./index";
+import axios from "axios";
+import * as Status from "./index";
 import { getRoomData } from "./room";
 
 /********************************* ACTIONS ***********************************/
@@ -32,10 +33,29 @@ function updatePlayer(playerID) {
 
 /********************************* THUNKS ***********************************/
 
-export function joinRoom(socket, joinCode) {
+export function requestJoinRoom(joinCode) {
   return function(dispatch) {
-    dispatch(setStatus(Status.CONNECTING, "Joining Game"));
-    socket.emit("request_join", joinCode, (joined, playerID) => {
+    dispatch(setStatus(Status.CONNECTING, "Searching for game..."));
+    axios.put(`/api/games/${joinCode}/join`)
+    .then((response) => {
+      dispatch(joinRoom(joinCode, response.data.player_id));
+    })
+    .catch((error) => {
+      let reason = "";
+      if(error.response) {
+        reason = ": " + error.response.data;
+      }
+      dispatch(setStatus(Status.ERROR, "Couldn't join game" + reason));
+    });
+  }
+}
+
+export function joinRoom(joinCode, playerID) {
+  console.log(`joinRoom(joinCode=${joinCode}, playerID=${playerID})`);
+  return function(dispatch, getStore, client) {
+    console.log("join room async thunk");
+    dispatch(setStatus(Status.CONNECTING, "Joining game..."))
+    client.emit("player_join", joinCode, playerID, (joined, playerID) => {
       if(joined) {
         dispatch(setStatus(Status.CONNECTED, "Loading Players"));
         dispatch(updatePlayer(playerID));
@@ -44,12 +64,12 @@ export function joinRoom(socket, joinCode) {
         dispatch(setStatus(Status.ERROR, "Couldn't join game. The game may be full, or it may have already started, or you may have mistyped the code."));
       }
     });
-  };
+  }
 }
 
 /********************************* REDUCER ***********************************/
 const initialState = {
-  status: Status.DISCONNECTED,
+  status: null,
   message: "",
   playerID: 0
 };
