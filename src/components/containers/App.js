@@ -4,6 +4,7 @@ import {disconnect} from "../../websocket";
 
 import Navbar from "../views/Navbar"
 import JoinMenu from "./JoinMenu";
+import GameLayout from "./GameLayout";
 import '../../styles/App.css';
 
 class App extends Component {
@@ -32,7 +33,7 @@ class App extends Component {
           <JoinMenu changeView={this.handleViewChange} />
         )}
         {this.state.view === "game" && (
-          <p>Welcome to the game!</p>
+          <GameLayout changeView={this.handleViewChange} />
         )}
       </div>
     );

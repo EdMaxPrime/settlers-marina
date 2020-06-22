@@ -1,0 +1,10 @@
+.game-container {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: flex-start;
+	align-items: flex-start;
+}
+
+.game-container:nth-child(2) {
+	margin-left: 20px;
+}

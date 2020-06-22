@@ -1,0 +1,43 @@
+#chat-container {
+	height: 50vh;
+	border-radius: 5px;
+	border: 1px solid #444;
+	background-color: white;
+}
+
+#chat-container h2 {
+	text-align: center;
+}
+
+#chat-list {
+	height: 80%;
+	overflow-y: scroll;
+	vertical-align: baseline;
+}
+
+#chat-input {
+	display: block;
+	height: 1em;
+	width: 100%;
+	padding: 5px;
+	margin: 0 0;
+}
+
+#chat-input:active {
+	outline: none;
+}
+
+.chat {
+	margin-right: 10%;
+	background-color: #eee;
+	border-radius: 1em;
+	text-align: left;
+}
+
+.chat-info {
+	background-color: #eef;
+}
+
+.chat-right {
+	text-align: right;
+}
