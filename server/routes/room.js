@@ -25,11 +25,12 @@ router.get("/:id/info", function(req, res, next) {
 
 /**
  * PUT /api/games/<id>/join
- * @request You must have a socketio session cookie
  * If the game exists, and can fit more players, you will be registered to the
- * database.
- * @response your player data as JSON
- * @error  if game is full, or DNE, you'll get 404
+ * database. If you are already in the game, nothing will change and you'll
+ * still get a succesful response.
+ * @request   You must have a socketio session cookie
+ * @response  your player data as JSON
+ * @error     if game is full, or DNE, you'll get 404
  */
 router.put("/:id/join", async function(req, res, next) {
 	let id = (req.params.id || "").toLowerCase();
@@ -39,6 +40,12 @@ router.put("/:id/join", async function(req, res, next) {
 	try {
 		//found it
 		const game = await Game.findByPk(id);
+		//if this person is already in the game, send their data again
+		const p = await game.getPlayers({where: {socket_id: req.settlers.id}});
+		if(p.length == 1) {
+			res.json(p[0].toJSON());
+		}
+		//otherwise, try to add a new player to the game
 		//if game can't fit more players, stop
 		if(game.num_players >= game.max_players)
 			throw new Error("This game is full");
@@ -56,15 +63,13 @@ router.put("/:id/join", async function(req, res, next) {
 		}, {transaction: t});
 		await game.addPlayer(newPlayer, {transaction: t});
 		//update the number of players
-		game.set("num_players", game.num_players+1);
-		await game.save({transaction: t});
+		await game.increment("num_players", {transaction: t});
 		//save changes to database
 		t.commit();
 		//then, respond with {player_id: }
 		res.json(newPlayer.toJSON());
 		//socketio server tells everyone about new player
-		req.settlers.ns.to(`${game.GameId} players`)
-		               .emit("chat", "info", `${newPlayer.nickname} is joining`);
+		newPlayer.info(req.settlers.ns, "$NAME is joining");
 	}
 	catch(err) {
 		console.log("Error Joining: ", err);
