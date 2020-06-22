@@ -5,3 +5,4 @@
 */
 export {default as user} from "../store/utilities/user.js"
 export {default as room} from "../store/utilities/room.js"
+export {default as chat} from "../store/utilities/chat.js"

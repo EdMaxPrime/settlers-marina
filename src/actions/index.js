@@ -11,3 +11,4 @@
    */
 export * from "../store/utilities/user";
 export * from "../store/utilities/room";
+export * from "../store/utilities/chat";
