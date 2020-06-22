@@ -31,6 +31,11 @@ function updateRoom(room) {
   };
 }
 
+/** Server-sent action dispatcher for "announcement" events */
+function announcement(message) {
+  announcement.dispatch(updateRoom({announcement: message}));
+}
+
 /********************************* THUNKS ***********************************/
 
 /**
@@ -48,6 +53,8 @@ export function getRoomData(joinCode) {
     .then(function(response) {
       if(joinCode) //if connecting for the first time, update status
         dispatch(setRoomStatus(Status.CONNECTED, ""));
+      //correctly map players array to player numbers
+      response.data.players = [null].concat(response.data.Players);
       dispatch(updateRoom(response.data));
     })
     .catch(function(error) {
@@ -74,6 +81,25 @@ export function createRoom() {
     .catch(function(error) {
       dispatch(setRoomStatus(Status.ERROR, "Couldn't create game at this time. Please try later."));
     });
+  }
+}
+
+/**
+ * Call this to listen to announcements from the server. Don't call twice.
+ */
+export function subscribeToAnnouncements() {
+  return function(dispatch, getStore, client) {
+    announcement.dispatch = dispatch;
+    client.on("announcement", announcement);
+  }
+}
+
+/**
+ * Call this to stop listening to announcements from the server.
+ */
+export function unsubscribeFromAnnouncements() {
+  return function(dispatch, getStore, client) {
+    client.off("announcement", announcement);
   }
 }
 
