@@ -47,7 +47,6 @@ export function unsubscribeFromChat() {
 export function sendChatMessage(message) {
   return function(dispatch, getStore, client) {
     client.emit("chat", getStore().room.id, message);
-    appendChat("msg", message, getStore().user.playerID);
   }
 }
 
