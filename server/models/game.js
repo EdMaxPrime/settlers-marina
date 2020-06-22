@@ -1,4 +1,6 @@
 'use strict';
+const utils = require("../websocket/utils");
+
 module.exports = (sequelize, DataTypes) => {
   /* Define constants and utilities here */
   const PHASE = {
@@ -40,6 +42,13 @@ module.exports = (sequelize, DataTypes) => {
   Game.associate = function(models) {
     Game.hasMany(models.Player);
     Game.belongsTo(models.Map);
+  };
+  /* Export utility functions */
+  Game.prototype.info = function(emmiter, message) {
+    utils.info(emmiter, this.id, message);
+  };
+  Game.prototype.announcement = function(emmiter, message) {
+    utils.announcement(emmiter, this.id, message);
   };
   /* Add constants and utilities here */
   Game.STATUS = STATUS;
