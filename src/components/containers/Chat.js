@@ -1,4 +1,4 @@
-import React, {Component} from "react";
+import React, {Component, Fragment} from "react";
 import {connect} from "react-redux";
 
 import {subscribeToChat, unsubscribeFromChat, sendChatMessage} from "../../actions";
@@ -40,14 +40,28 @@ class GameLayout extends Component {
     this.props.sendChatMessage(this.state.newChat);
     this.setState({newChat: ""});
   }
+  senderName(playerID) {
+    if(this.props.players.length >= playerID)
+      return this.props.players[playerID].nickname;
+    return "?";
+  }
   render() {
     return (
       <div id="chat-container">
         <h2>Chat</h2>
         <div id="chat-list">
-        {this.props.chats.map(function(c, index) {
-          return <p key={index} className={"chat chat-"+c.type}>{c.from}: {c.message}</p>
-        })}
+        {this.props.chats.map(function(c, index, history) {
+          if(c.type === "msg" && 
+            (index == 0 || 
+              history[index-1].type !== "msg" || 
+              history[index-1].sender !== c.sender)) {
+            return (<Fragment key={index}>
+              <p className="chat-sender">{this.senderName(c.sender)}</p>
+              <p className="chat chat-msg">{c.message}</p>
+            </Fragment>);
+          }
+          return <p key={index} className={"chat chat-"+c.type}>{c.message}</p>
+        }, this)}
         </div>
         <form onSubmit={this.sendChat}>
           <input id="chat-input" 
@@ -71,7 +85,8 @@ const mapDispatchToProps = function(dispatch) {
 
 const mapStateToProps = function(state) {
   return {
-    chats: state.chat
+    chats: state.chat,
+    players: state.room.players
   };
 };
 

@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
 
-import {subscribeToChat, unsubscribeFromChat} from "../../actions";
+import {subscribeToAnnouncements, unsubscribeFromAnnouncements} from "../../actions";
 import * as ConnectionStatus from "../../store/utilities";
 
 import Chat from "./Chat";
@@ -27,6 +27,12 @@ class GameLayout extends Component {
       this.props.changeView("main");
     }
   }
+  componentDidMount() {
+    this.props.setup();
+  }
+  componentWillUnmount() {
+    this.props.cleanup();
+  }
   handleJoinCodeChange(event) {
     this.setState({joinCode: event.target.value});
   }
@@ -36,12 +42,18 @@ class GameLayout extends Component {
   render() {
     return (
       <div className="game-container">
-        <div>
-          <p>Join Code: {this.props.joinCode}</p>
+        <div className="text-left">
+          <h1 className="game-announcement">{this.props.announcement}</h1>
+          <p className="subtle">Join Code: {this.props.joinCode} | {this.props.num_players} players | {this.props.gameStatus}</p>
         </div>
-        <div>
-          <p>List of Players Here</p>
-          <Chat />
+        <div className="columns">
+          <div>
+            <p>Join Code: {this.props.joinCode}</p>
+          </div>
+          <div>
+            <p>List of Players Here</p>
+            <Chat />
+          </div>
         </div>
       </div>
       );
@@ -50,8 +62,8 @@ class GameLayout extends Component {
 
 const mapDispatchToProps = function(dispatch) {
   return {
-    setup: () => dispatch(subscribeToChat()),
-    cleanup: () => dispatch(unsubscribeFromChat())
+    setup: () => dispatch(subscribeToAnnouncements()),
+    cleanup: () => dispatch(unsubscribeFromAnnouncements())
   };
 };
 
@@ -60,7 +72,9 @@ const mapStateToProps = function(state) {
     chats: state.chat,
     gameStatus: state.room.connection.status,
     gameStatusMsg: state.room.connection.message,
-    joinCode: state.room.id
+    joinCode: state.room.id,
+    announcement: state.room.announcement,
+    num_players: state.room.num_players
   };
 };
 

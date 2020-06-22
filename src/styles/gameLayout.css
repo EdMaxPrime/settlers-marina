@@ -1,10 +1,37 @@
 .game-container {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	color: white;
+	width: 80%;
+}
+
+.game-container .text-left {
+	text-align: left;
+}
+
+.game-announcement {
+	display: inline-block;
+	text-align: left;
+	background-color: #D81E5B;
+	color: white;
+	font-size: 1em;
+	padding: 10px 20px;
+	margin: 20px 0px 10px 0px;
+	border-radius: 1em;
+}
+
+.columns {
 	display: flex;
 	flex-flow: row wrap;
 	justify-content: flex-start;
 	align-items: flex-start;
 }
 
-.game-container:nth-child(2) {
+.columns:nth-child(2) {
 	margin-left: 20px;
+}
+
+.subtle {
+	color: #e0e0e0;
 }
