@@ -14,7 +14,7 @@ router.get("/:id/info", function(req, res, next) {
 	Game.findByPk(id, {include:[Player, Map]}).then(game => {
 		//found it
 		//add some extra fields for the response
-		game.join_code = game.id;
+		game.joinCode = game.id;
 		res.json(game.toJSON());
 	})
 	.catch(err => {
@@ -62,7 +62,9 @@ router.put("/:id/join", async function(req, res, next) {
 		t.commit();
 		//then, respond with {player_id: }
 		res.json(newPlayer.toJSON());
-		//TODO: socketio server tells everyone about new player
+		//socketio server tells everyone about new player
+		req.settlers.ns.to(`${game.GameId} players`)
+		               .emit("chat", "info", `${newPlayer.nickname} is joining`);
 	}
 	catch(err) {
 		console.log("Error Joining: ", err);

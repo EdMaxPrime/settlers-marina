@@ -8,9 +8,11 @@
 
 //import all files here
 const gameEvents = require("./games");
+const chatEvents = require("./chat");
 
 //the main app file just has to call this function with the socketio namespace
 module.exports = (ns) => {
 	//call each file's exported function with the provided namespace
 	gameEvents(ns);
+	chatEvents(ns);
 }
