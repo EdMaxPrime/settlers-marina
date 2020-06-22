@@ -1,4 +1,4 @@
-const {Player} = require("../models");
+const {Game, Player} = require("../models");
 
 module.exports = (server) => {
 	server.on("connect", (socket) => {
@@ -26,10 +26,8 @@ module.exports = (server) => {
 						//send successful acknowledgment
 						response(true, player.player_id);
 						//announce the arrival of this player
-						server.to(`${gameId} players`).emit("chat", {
-							type: "CHAT_INFO",
-							payload: {message: player.nickname + " joined"}
-						});
+						server.to(`${gameId} players`)
+						      .emit("chat", "info", player.nickname + " joined");
 					}
 				});
 			})
@@ -38,6 +36,31 @@ module.exports = (server) => {
 				//send error acknowledgement
 				response(false);
 			})
+		});
+		/* EVENT: disconnect
+		 * This is fired when a socket disconnects from the server
+		 */
+		socket.on("disconnect", async () => {
+			try {
+				let player = Player.findOne({where: {
+					socket_id: socket.id
+				}});
+				if(player != null) {
+					let game = await player.getGame();
+					player = await player.update("status", Player.STATUS.DISCONNECTED);
+					console.log("before decrement" + game.num_players);
+					await game.decrement("num_players");
+					await game.reload();
+					console.log("after decrement" + game.num_players);
+					//shut down game
+					if(game.num_players <= 0) {
+						await game.destroy();
+					}
+				}
+			} 
+			catch(err) {
+				console.log("Failed to delete player " + socket.id);
+			}
 		});
 	});
 }
