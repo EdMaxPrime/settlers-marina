@@ -1,4 +1,6 @@
 'use strict';
+const utils = require("../websocket/utils");
+
 module.exports = (sequelize, DataTypes) => {
   /* Define constants and utilities */
   const STATUS = {
@@ -41,6 +43,17 @@ module.exports = (sequelize, DataTypes) => {
   /* Define associations here */
   Player.associate = function(models) {
     Player.belongsTo(models.Game); //Player.GameId references Game.id
+  };
+  /* Export utility functions */
+  Player.prototype.chat = function(emmiter, message) {
+    utils.chat(emmiter, this.GameId, message, this.player_id);
+  };
+  Player.prototype.info = function(emmiter, message) {
+    message = message.replace("$ID", this.player_id).replace("$NAME", this.nickname);
+    utils.info(emmiter, this.GameId, message);
+  };
+  Player.prototype.announcement = function(emmiter, message) {
+    utils.announcement(emmiter, this.GameId, message);
   };
   /* Export constants */
   Player.STATUS = STATUS;
