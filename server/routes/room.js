@@ -24,28 +24,23 @@ router.get("/:id/info", function(req, res, next) {
 });
 
 /**
- * PUT /api/games/<id>/join
+ * POST /api/games/<id>/join
  * If the game exists, and can fit more players, you will be registered to the
- * database. If you are already in the game, nothing will change and you'll
- * still get a succesful response.
- * @request   You must have a socketio session cookie
+ * database.
+ * @request   nothing special
  * @response  your player data as JSON
  * @error     if game is full, or DNE, you'll get 404
  */
-router.put("/:id/join", async function(req, res, next) {
+router.post("/:id/join", async function(req, res, next) {
 	let id = (req.params.id || "").toLowerCase();
 	//this is the transaction that makes operations more atomic
 	var t;
-	//try to find this room in the database
 	try {
-		//found it
+		//try to find this room in the database
 		const game = await Game.findByPk(id);
-		//if this person is already in the game, send their data again
-		const p = await game.getPlayers({where: {socket_id: req.settlers.id}});
-		if(p.length == 1) {
-			res.json(p[0].toJSON());
-		}
-		//otherwise, try to add a new player to the game
+		//handle the case where the game doesn't exist
+		if(!game) throw new Error("This game does not exist");
+		//otherwise, the game exists...
 		//if game can't fit more players, stop
 		if(game.num_players >= game.max_players)
 			throw new Error("This game is full");
@@ -53,7 +48,7 @@ router.put("/:id/join", async function(req, res, next) {
 		t = await sequelize.transaction();
 		//add player to game
 		const newPlayer = await Player.create({
-			socket_id: req.settlers.id,
+			socket_id: req.body["socket.io"],
 			player_id: pid,
 			nickname: "Player" + pid,
 			color: Player.PLAYER_COLORS[pid],
@@ -66,25 +61,28 @@ router.put("/:id/join", async function(req, res, next) {
 		await game.increment("num_players", {transaction: t});
 		//save changes to database
 		t.commit();
+		//create session authentication token
+		req.session.player = newPlayer.id;
 		//then, respond with {player_id: }
 		res.json(newPlayer.toJSON());
 		//socketio server tells everyone about new player
-		newPlayer.info(req.settlers.ns, "$NAME is joining");
+		newPlayer.info("$NAME is joining");
 	}
 	catch(err) {
 		console.log("Error Joining: ", err);
 		if(t) {
 			t.rollback();
 		}
-		res.status(404).send("This game doesn't exist");
+		res.status(404).send(err.message);
 	}
 });
 
-router.post("/new_game", async function(req, res, next) {
+router.post("/create", async function(req, res, next) {
 	try {
 		let host = await sequelize.transaction(async function(t) {
 			//generate new ID for game
 			let id = await generateJoinCode(t);
+			console.log("[API/create] creating game: " + id + " by " + req.body["socket.io"]);
 			//store game in the database
 			const game = await Game.create({
 				id: id,
@@ -98,7 +96,7 @@ router.post("/new_game", async function(req, res, next) {
 			}, {transaction: t});
 			//add 1 player, the host, to this game
 			const host = await game.createPlayer({
-				socket_id: req.settlers.id,
+				socket_id: req.body["socket.io"],
 				player_id: 1,
 				nickname: "Player1",
 				color: Player.PLAYER_COLORS[1],
@@ -108,12 +106,16 @@ router.post("/new_game", async function(req, res, next) {
 			}, {transaction: t});
 			return host;
 		});
-		console.log("created game!");
-		//if it succeeded, send join code in response
+		console.log("[CREATED] the game was created (room.js:112)");
+		//if the operation succeeded...
+		//create session authentication token
+		req.session.player = host.id;
+		console.log("[CREATED] host %d with session %j", host.id, req.session);
+		//send succesful response with player JSON data
 		res.json({...host.toJSON(), join_code: host.GameId});
 	} catch(err) {
 		//if it failed, send error response
-		console.log("Failed to create game: ", err);
+		console.log("[CREATED] Failed to create game: ", err.stack);
 		res.status(500).send("");
 	}
 });
