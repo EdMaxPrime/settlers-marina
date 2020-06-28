@@ -34,7 +34,7 @@ module.exports = {
       updatedAt: new Date()
     }
     ];
-    await queryInterface.bulkInsert("Maps", maps, {}, {map_data: {type: new Sequelize.JSON()}});
+    return queryInterface.bulkInsert("Maps", maps, {}, {map_data: {type: new Sequelize.JSON()}});
   },
 
   down: (queryInterface, Sequelize) => {
@@ -45,6 +45,6 @@ module.exports = {
       Example:
       return queryInterface.bulkDelete('People', null, {});
     */
-    return queryInterface.bulkDelete("Map", null, {});
+    return queryInterface.bulkDelete("Maps", null, {});
   }
 };
