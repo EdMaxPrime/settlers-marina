@@ -1,6 +1,9 @@
 import io from "socket.io-client";
 
-var socket = io("http://localhost:3001/settlers", {
+const endpoint = "http://192.168.1.28:3001";
+
+var socket = io(endpoint + "/settlers", {
+	autoConnect: false,
     rejectUnauthorized: false
 });
 
@@ -10,6 +13,9 @@ socket.on("connection", () => {
 socket.on("connect_error", (error) => {
     console.log("Error connecting to socket");
     console.log(error);
+});
+socket.on("error", (error) => {
+	console.log("Socket.io error: ", error);
 });
 socket.on("reconnect_error", (error) => {
     console.log("Reconnection error");
@@ -21,6 +27,10 @@ socket.on("reconnect_attempt", (attempt) => {
 socket.on("disconnect", () => {
     console.log("disconnecting with socket.id=" + socket.id);
 });
+
+export function connect() {
+	socket.open();
+}
 
 export function disconnect() {
 	socket.disconnect();

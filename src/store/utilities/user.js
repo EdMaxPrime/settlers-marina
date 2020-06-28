@@ -1,6 +1,6 @@
 import axios from "axios";
 import * as Status from "./index";
-import { getRoomData } from "./room";
+import {getRoomData} from "./room";
 
 /********************************* ACTIONS ***********************************/
 
@@ -33,12 +33,30 @@ function updatePlayer(playerID) {
 
 /********************************* THUNKS ***********************************/
 
+function connectToRoom(joinCode) {
+  return function(dispatch, getStore, client) {
+    console.log(`connectToRoom(joinCode=${joinCode})`);
+    client.emit("request_join", joinCode, function(joined, playerID) {
+      console.log("connectToRoom() succeeded: " + joined);
+      if(joined) {
+        dispatch(setStatus(Status.CONNECTED, "You're in!"));
+        dispatch(updatePlayer(playerID));
+        dispatch(getRoomData(joinCode));
+      } else {
+        dispatch(setStatus(Status.ERROR, "Couldn't join game: " + playerID));
+      }
+    });
+  };
+}
+
 export function requestJoinRoom(joinCode) {
-  return function(dispatch) {
+  return function(dispatch, getStore, client) {
     dispatch(setStatus(Status.CONNECTING, "Searching for game..."));
-    axios.put(`/api/games/${joinCode}/join`)
+    axios.post(`/api/games/${joinCode}/join`, {
+      "socket.io": client.id
+    })
     .then((response) => {
-      dispatch(joinRoom(joinCode, response.data.player_id));
+      dispatch(connectToRoom(joinCode));
     })
     .catch((error) => {
       let reason = "";
@@ -50,10 +68,33 @@ export function requestJoinRoom(joinCode) {
   }
 }
 
+/**
+ * Ask the server to create a new room/game. The server will respond with:
+ *     join_code: (string) the new game's identifier
+ *     player_id: (int)    your player id within the game
+ * This user should then subscribe to game updates with socketio.
+ * Finally, fetch game, map and player data from the database.
+ */
+export function createRoom() {
+  return function(dispatch, getStore, client) {
+    dispatch(setStatus(Status.CONNECTING, "Creating game..."));
+    axios.post("/api/games/create", {
+      "socket.io": client.id
+    })
+    .then(function(response) {
+      console.log("confirmed that room was created: ", response.data);
+      dispatch(connectToRoom(response.data.join_code));
+    })
+    .catch(function(error) {
+      dispatch(setStatus(Status.ERROR, "Couldn't create game at this time. Please try later."));
+    });
+  }
+}
+
 export function joinRoom(joinCode, playerID) {
   console.log(`joinRoom(joinCode=${joinCode}, playerID=${playerID})`);
   return function(dispatch, getStore, client) {
-    console.log("join room async thunk");
+    console.log("join room async thunk: client: " + client.id);
     dispatch(setStatus(Status.CONNECTING, "Joining game..."))
     client.emit("player_join", joinCode, playerID, (joined, playerID) => {
       if(joined) {

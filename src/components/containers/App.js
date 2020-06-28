@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import {connect} from "react-redux";
-import {disconnect} from "../../websocket";
+import {connect as openConnection, disconnect} from "../../websocket";
 
 import Navbar from "../views/Navbar"
 import JoinMenu from "./JoinMenu";
@@ -20,6 +20,10 @@ class App extends Component {
   handleViewChange(view) {
     console.log("changing view: " + view);
     this.setState({view: view});
+  }
+  /* React Lifecycle Method. Resources should be opened here. */
+  componentDidMount() {
+    openConnection();
   }
   /* React Lifecycle Method. Resources should be cleaned up here. */
   componentWillUnmount() {

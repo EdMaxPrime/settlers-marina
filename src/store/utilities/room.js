@@ -1,11 +1,11 @@
 import * as Status from "./index";
-import { joinRoom } from "./user";
 import axios from "axios";
 
 /********************************* ACTIONS ***********************************/
 
 const SET_STATUS = "SET_STATUS";
 const UPDATE_ROOM = "UPDATE_ROOM";
+const ADD_PLAYER = "ADD_PLAYER";
 
 // ACTION CREATORS
 /**
@@ -36,6 +36,11 @@ function announcement(message) {
   announcement.dispatch(updateRoom({announcement: message}));
 }
 
+/** Server-sent action dispatcher for "announcement" events */
+function settingsChanged(settings) {
+  settingsChanged.dispatch({type: "settings"});
+}
+
 /********************************* THUNKS ***********************************/
 
 /**
@@ -64,33 +69,15 @@ export function getRoomData(joinCode) {
 }
 
 /**
- * Ask the server to create a new room/game. The server will respond with:
- *     join_code: (string) the new game's identifier
- *     player_id: (int)    your player id within the game
- * This user should then subscribe to game updates with socketio.
- * Finally, fetch game, map and player data from the database.
- */
-export function createRoom() {
-  return function(dispatch) {
-    dispatch(setRoomStatus(Status.CREATING, "Creating game..."));
-    axios.post("/api/games/new_game")
-    .then(function(response) {
-      console.log("confirmed that room was created: ");
-      dispatch(joinRoom(response.data.join_code, response.data.player_id));
-    })
-    .catch(function(error) {
-      dispatch(setRoomStatus(Status.ERROR, "Couldn't create game at this time. Please try later."));
-    });
-  }
-}
-
-/**
  * Call this to listen to announcements from the server. Don't call twice.
  */
 export function subscribeToAnnouncements() {
   return function(dispatch, getStore, client) {
     announcement.dispatch = dispatch;
     client.on("announcement", announcement);
+    client.on("player_join", function(player) {
+      dispatch({type: ADD_PLAYER, payload: player});
+    });
   }
 }
 
@@ -100,6 +87,25 @@ export function subscribeToAnnouncements() {
 export function unsubscribeFromAnnouncements() {
   return function(dispatch, getStore, client) {
     client.off("announcement", announcement);
+    client.off("player_join");
+  }
+}
+
+export function subscribeToSettings() {
+  return function(dispatch, getStore, client) {
+    client.on("settings", settingsChanged);
+  }
+}
+
+export function unsubscribeFromSettings() {
+  return function(dispatch, getStore, client) {
+    client.off("settings", settingsChanged);
+  }
+}
+
+export function nextTurn() {
+  return function(dispatch, getStore, client) {
+    dispatch({type: "next turn"});
   }
 }
 
@@ -130,6 +136,13 @@ export default function roomReducer(state = initialState, action) {
       });
     case UPDATE_ROOM:
       return Object.assign({}, state, action.payload);
+    case ADD_PLAYER:
+      let p = state.players.slice();
+      p[action.payload.player_id] = action.payload;
+      return Object.assign({}, state, {
+        num_players: state.num_players + 1,
+        players: p
+      });
     default:
       return state;
   }
