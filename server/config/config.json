@@ -3,7 +3,8 @@
     "dialect": "sqlite",
     "storage": "./database.sqlite3",
     "seederStorage": "sequelize",
-    "seederStorageTableName": "SequelizeSeeds"
+    "seederStorageTableName": "SequelizeSeeds",
+    "logging": false
   },
   "test": {
     "dialect": "sqlite",
