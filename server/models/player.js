@@ -1,5 +1,5 @@
 'use strict';
-const utils = require("../websocket/utils");
+const utils = require("../websocket");
 
 module.exports = (sequelize, DataTypes) => {
   /* Define constants and utilities */
@@ -45,16 +45,21 @@ module.exports = (sequelize, DataTypes) => {
     Player.belongsTo(models.Game); //Player.GameId references Game.id
   };
   /* Export utility functions */
-  Player.prototype.chat = function(emmiter, message) {
-    utils.chat(emmiter, this.GameId, message, this.player_id);
+  Player.prototype.chat = function(message) {
+    utils.chat(this.GameId, message, this.player_id);
   };
-  Player.prototype.info = function(emmiter, message) {
+  Player.prototype.info = function(message) {
     message = message.replace("$ID", this.player_id).replace("$NAME", this.nickname);
-    utils.info(emmiter, this.GameId, message);
+    utils.info(this.GameId, message);
   };
-  Player.prototype.announcement = function(emmiter, message) {
-    utils.announcement(emmiter, this.GameId, message);
+  Player.prototype.announcement = function(message) {
+    message = message.replace("$NAME", this.nickname).replace("$GAME", this.GameId);
+    utils.announcement(this.GameId, message);
   };
+  Player.prototype.disconnect = async function() {
+    await this.update({status: STATUS.DISCONNECTED, socket_id: null});
+    return (await this.getGame()).decrement("num_players");
+  }
   /* Export constants */
   Player.STATUS = STATUS;
   Player.PLAYER_COLORS = PLAYER_COLORS;

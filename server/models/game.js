@@ -4,10 +4,12 @@ const utils = require("../websocket/utils");
 module.exports = (sequelize, DataTypes) => {
   /* Define constants and utilities here */
   const PHASE = {
+    LOBBY: "LOBBY",
     SETUP1: "SETUP1",
     SETUP2: "SETUP2",
     REGULAR: "REGULAR",
-    SPECIAL: "SPECIAL"
+    SPECIAL: "SPECIAL",
+    GAME_OVER: "GAME_OVER"
   };
   const STATUS = {
     LOBBY: "CREATED",
@@ -31,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
     max_players:         DataTypes.INTEGER,
     turn_now:     {type: DataTypes.INTEGER, defaultValue: NOBODY},
     special_turn: {type: DataTypes.INTEGER, defaultValue: NOBODY},
-    phase:        {type: DataTypes.INTEGER, defaultValue: PHASE.SETUP1},
+    phase:        {type: DataTypes.INTEGER, defaultValue: PHASE.LOBBY},
     seed:                DataTypes.INTEGER,
     deck:                DataTypes.STRING,
     structures:   {type: DataTypes.TEXT,    defaultValue: ""},
@@ -43,6 +45,13 @@ module.exports = (sequelize, DataTypes) => {
     Game.hasMany(models.Player);
     Game.belongsTo(models.Map);
   };
+  /* Define Hooks here */
+  Game.afterUpdate(game => {
+    if(game.num_players <= 0)
+      game.destroy()
+          .then(() => console.log(`[DESTROYED] game ${game.id}`))
+          .catch(err => console.log("[DESTROYED] failed to destroy game "+game.id, error));
+  });
   /* Export utility functions */
   Game.prototype.info = function(emmiter, message) {
     utils.info(emmiter, this.id, message);
