@@ -6,14 +6,12 @@ import * as ConnectionStatus from "../../store/utilities";
 
 import Chat from "./Chat";
 import Status from "../views/Status";
+import PlayerList from "./PlayerList";
 import "../../styles/gameLayout.css"
 
 class GameLayout extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      newChat: ""
-    };
     this.handleJoinCodeChange = this.handleJoinCodeChange.bind(this);
     this.handleJoinRequest = this.handleJoinRequest.bind(this);
   }
@@ -48,10 +46,10 @@ class GameLayout extends Component {
         </div>
         <div className="columns">
           <div>
-            <p>Join Code: {this.props.joinCode}</p>
+            <p>There will be more content on this side.</p>
           </div>
           <div>
-            <p>List of Players Here</p>
+            <PlayerList />
             <Chat />
           </div>
         </div>

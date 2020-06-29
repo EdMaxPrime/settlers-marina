@@ -6,6 +6,7 @@ import axios from "axios";
 const SET_STATUS = "SET_STATUS";
 const UPDATE_ROOM = "UPDATE_ROOM";
 const ADD_PLAYER = "ADD_PLAYER";
+const REMOVE_PLAYER = "REMOVE_PLAYER";
 
 // ACTION CREATORS
 /**
@@ -78,6 +79,9 @@ export function subscribeToAnnouncements() {
     client.on("player_join", function(player) {
       dispatch({type: ADD_PLAYER, payload: player});
     });
+    client.on("player_leave", function(player_id) {
+      dispatch({type: REMOVE_PLAYER, payload: player_id});
+    });
   }
 }
 
@@ -122,7 +126,8 @@ const initialState = {
   winner: -1,
   host: -1,
   announcement: "",
-  players: []
+  players: [null],
+  order: []
 };
 
 export default function roomReducer(state = initialState, action) {
@@ -135,13 +140,28 @@ export default function roomReducer(state = initialState, action) {
         }
       });
     case UPDATE_ROOM:
-      return Object.assign({}, state, action.payload);
+      let a = Object.assign({}, state, action.payload);
+      a.order = a.players.filter(player => player != null && player.status === "JOINED")
+      .sort((p1, p2) => p1.turn_order - p2.turn_order)
+      .map(player => player.player_id);
+      return a;
     case ADD_PLAYER:
       let p = state.players.slice();
       p[action.payload.player_id] = action.payload;
       return Object.assign({}, state, {
         num_players: state.num_players + 1,
-        players: p
+        players: p,
+        order: state.order.concat(action.payload.player_id)
+      });
+    case REMOVE_PLAYER:
+      return Object.assign({}, state, {
+        num_players: state.num_players - 1,
+        players: state.players.map(function(player) {
+          return (player !== null && player.player_id === action.payload)? null : player;
+        }),
+        order: state.order.filter(function(t) {
+          return t !== action.payload;
+        })
       });
     default:
       return state;

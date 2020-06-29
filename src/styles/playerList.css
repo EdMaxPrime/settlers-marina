@@ -1,0 +1,36 @@
+.player-list {
+	border-radius: 5px;
+	border: 1px solid #444;
+	background-color: white;
+	color: black;
+}
+
+.player-list h2 {
+	text-align: center;
+}
+
+.player-list table {
+	padding: 0;
+	border: none;
+	margin: 0px 10px;
+}
+
+.player-list td {
+	padding: 2px 0.5em;
+}
+
+.player-icon {
+	display: inline-block;
+	width: 1em;
+	height: 1em;
+	border-radius: 1em;
+	background-color: black;
+}
+
+/* Background colors for player icons */
+.player-green  { background-color: #0f0; }
+.player-red    { background-color: #f00; }
+.player-blue   { background-color: #00f; }
+.player-orange { background-color: #f90; }
+.player-purple { background-color: #909; }
+.player-cyan   { background-color: #099; }
