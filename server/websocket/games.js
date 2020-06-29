@@ -67,6 +67,7 @@ server.on("connect", (socket) => {
 	socket.on("disconnect", async () => {
 		try {
 			console.log("[DISCONNECT] disconnecting " + socket.id);
+			server.to(`${session.game} players`).emit("player_leave", session.player);
 			let status = await auth.logout(session);
 			// let player = await Player.findOne({where: {
 			// 	socket_id: socket.id

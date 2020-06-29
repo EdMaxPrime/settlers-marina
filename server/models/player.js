@@ -9,12 +9,13 @@ module.exports = (sequelize, DataTypes) => {
     DISCONNECTED: "DISCONNECTED"
   };
   const PLAYER_COLORS = {
-    0: "#0f0",
-    1: "#00f",
-    2: "#f00",
-    3: "#fff",
-    4: "#a0a",
-    5: "#090"
+    0: "green",
+    1: "red",
+    2: "blue",
+    3: "orange",
+    4: "purple",
+    5: "white",
+    6: "cyan"
   };
   /* Define database table/model */
   const Player = sequelize.define('Player', {
@@ -58,7 +59,8 @@ module.exports = (sequelize, DataTypes) => {
   };
   Player.prototype.disconnect = async function() {
     await this.update({status: STATUS.DISCONNECTED, socket_id: null});
-    return (await this.getGame()).decrement("num_players");
+    const game = await this.getGame();
+    return game.playerLeft();
   }
   /* Export constants */
   Player.STATUS = STATUS;

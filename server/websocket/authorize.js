@@ -20,6 +20,7 @@ function isAuthorized(session, gameID) {
 async function login(session) {
 	const player = await getPlayer(session);
 	session.game = player.GameId;
+	session.player = player.player_id;
 	return player.update({
 		status: "JOINED"
 	});
@@ -37,6 +38,7 @@ async function logout(session) {
 		const player = await getPlayer(session);
 		await player.disconnect();
 		delete session.game;
+		delete session.player;
 		console.log("[LOGOUT] logged player out");
 		return true;
 	} catch(err) {

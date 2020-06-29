@@ -1,5 +1,5 @@
 'use strict';
-const utils = require("../websocket/utils");
+const utils = require("../websocket");
 
 module.exports = (sequelize, DataTypes) => {
   /* Define constants and utilities here */
@@ -45,19 +45,21 @@ module.exports = (sequelize, DataTypes) => {
     Game.hasMany(models.Player);
     Game.belongsTo(models.Map);
   };
-  /* Define Hooks here */
-  Game.afterUpdate(game => {
-    if(game.num_players <= 0)
-      game.destroy()
-          .then(() => console.log(`[DESTROYED] game ${game.id}`))
-          .catch(err => console.log("[DESTROYED] failed to destroy game "+game.id, error));
-  });
   /* Export utility functions */
-  Game.prototype.info = function(emmiter, message) {
-    utils.info(emmiter, this.id, message);
+  Game.prototype.info = function(message) {
+    utils.info(this.id, message);
   };
-  Game.prototype.announcement = function(emmiter, message) {
-    utils.announcement(emmiter, this.id, message);
+  Game.prototype.announcement = function(message) {
+    utils.announcement(this.id, message);
+  };
+  Game.prototype.playerLeft = function() {
+    if(this.num_players <= 1) {
+      console.log("[GAME] destroying model since players left");
+      return this.destroy();
+    } else {
+      console.log("[GAME] decrement num_players: " + this.num_players);
+      return this.decrement("num_players");
+    }
   };
   /* Add constants and utilities here */
   Game.STATUS = STATUS;
