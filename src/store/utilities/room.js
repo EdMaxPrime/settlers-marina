@@ -1,5 +1,6 @@
 import * as Status from "./index";
 import axios from "axios";
+import {setStatus} from "./user";
 
 /********************************* ACTIONS ***********************************/
 
@@ -82,6 +83,9 @@ export function subscribeToAnnouncements() {
     client.on("player_leave", function(player_id) {
       dispatch({type: REMOVE_PLAYER, payload: player_id});
     });
+    client.on("disconnect", function() {
+      dispatch(setStatus(Status.DISCONNECTED, "You were disconnected from " + getStore().room.id));
+    });
   }
 }
 
@@ -92,6 +96,7 @@ export function unsubscribeFromAnnouncements() {
   return function(dispatch, getStore, client) {
     client.off("announcement", announcement);
     client.off("player_join");
+    client.off("disconnect");
   }
 }
 

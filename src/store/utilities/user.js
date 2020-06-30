@@ -16,7 +16,7 @@ const SET_PLAYER = "SET_PLAYER";
  * @param statusCode  a constant from StatusCode (index.js)
  * @param message     a string to show the user
  */
-function setStatus(statusCode, message) {
+export function setStatus(statusCode, message) {
   return {
     type: SET_STATUS,
     status: statusCode,

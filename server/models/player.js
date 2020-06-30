@@ -9,13 +9,14 @@ module.exports = (sequelize, DataTypes) => {
     DISCONNECTED: "DISCONNECTED"
   };
   const PLAYER_COLORS = {
-    0: "green",
-    1: "red",
-    2: "blue",
-    3: "orange",
-    4: "purple",
-    5: "white",
-    6: "cyan"
+    0: "black",
+    1: "green",
+    2: "red",
+    3: "blue",
+    4: "orange",
+    5: "purple",
+    6: "white",
+    7: "cyan"
   };
   /* Define database table/model */
   const Player = sequelize.define('Player', {

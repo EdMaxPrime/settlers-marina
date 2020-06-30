@@ -33,7 +33,7 @@ async function login(session) {
  *                          was previously part of a game and is now leaving.
  */
 async function logout(session) {
-	console.log("[LOGOUT] logging player out");
+	console.log("[LOGOUT] logging player out %j", session);
 	try {
 		const player = await getPlayer(session);
 		await player.disconnect();
@@ -42,7 +42,7 @@ async function logout(session) {
 		console.log("[LOGOUT] logged player out");
 		return true;
 	} catch(err) {
-		console.log("[LOGOUT] Error logging player out: ", err);
+		console.log("[LOGOUT] Error logging player out: %j", session);
 		return false;
 	}
 }
