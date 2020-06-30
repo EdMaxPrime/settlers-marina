@@ -17,6 +17,11 @@ function getDefaultTurnOrder(state) { return state.room.order; }
 function getTurnIndex(state) { return state.room.turn; }
 export function getPhase(state) { return state.room.phase; }
 
+export const getPlayerNames = createSelector(
+	[getPlayers],
+	function(players) {
+		return players.map(player => (player === null)? "?" : player.nickname);
+	});
 export const filterActivePlayers = createSelector(
 	[getPlayers, getDefaultTurnOrder], 
 	function(players, order) {
