@@ -2,12 +2,13 @@ import React, {Component, Fragment} from "react";
 import {connect} from "react-redux";
 
 import {subscribeToChat, unsubscribeFromChat, sendChatMessage} from "../../actions";
+import {getPlayerNames} from "../../selectors";
 import * as ConnectionStatus from "../../store/utilities";
 
 import Status from "../views/Status";
 import "../../styles/chat.css"
 
-class GameLayout extends Component {
+class Chat extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -41,7 +42,7 @@ class GameLayout extends Component {
     this.setState({newChat: ""});
   }
   senderName(playerID) {
-    if(this.props.players.length >= playerID)
+    if(this.props.players[playerID])
       return this.props.players[playerID].nickname;
     return "?";
   }
@@ -90,4 +91,4 @@ const mapStateToProps = function(state) {
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(GameLayout);
+export default connect(mapStateToProps, mapDispatchToProps)(Chat);
