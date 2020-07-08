@@ -86,6 +86,10 @@ export function subscribeToAnnouncements() {
     client.on("disconnect", function() {
       dispatch(setStatus(Status.DISCONNECTED, "You were disconnected from " + getStore().room.id));
     });
+    client.on("next_turn", function(phase, turn) {
+      console.log("received next_turn event: phase=" + phase + ", turn=" + turn);
+      dispatch(updateRoom({phase: phase, turn: turn}));
+    });
   }
 }
 
@@ -97,6 +101,7 @@ export function unsubscribeFromAnnouncements() {
     client.off("announcement", announcement);
     client.off("player_join");
     client.off("disconnect");
+    client.off("next_turn");
   }
 }
 
@@ -114,7 +119,8 @@ export function unsubscribeFromSettings() {
 
 export function nextTurn() {
   return function(dispatch, getStore, client) {
-    dispatch({type: "next turn"});
+    console.log("emmitting next_turn");
+    client.emit("next_turn");
   }
 }
 
@@ -125,7 +131,7 @@ const initialState = {
     message: ""
   },
   joinCode: "",
-  turn: -1,
+  turn_now: -1,
   specialTurn: -1,
   phase: "regular",
   winner: -1,

@@ -7,6 +7,8 @@ import * as ConnectionStatus from "../../store/utilities";
 import Chat from "./Chat";
 import Status from "../views/Status";
 import PlayerList from "./PlayerList";
+import GameSettings from "./GameSettings";
+import TileMap from "./Map";
 import "../../styles/gameLayout.css"
 
 class GameLayout extends Component {
@@ -42,11 +44,11 @@ class GameLayout extends Component {
       <div className="game-container">
         <div className="text-left">
           <h1 className="game-announcement">{this.props.announcement}</h1>
-          <p className="subtle">Join Code: {this.props.joinCode} | {this.props.num_players} players | {this.props.gameStatus}</p>
+          <p className="subtle">Join Code: {this.props.joinCode} | {this.props.num_players} players | {this.props.phase}</p>
         </div>
         <div className="columns">
           <div>
-            <p>There will be more content on this side.</p>
+            {this.props.phase == "LOBBY"? <GameSettings /> : <TileMap />}
           </div>
           <div>
             <PlayerList />
@@ -70,6 +72,7 @@ const mapStateToProps = function(state) {
     chats: state.chat,
     gameStatus: state.room.connection.status,
     gameStatusMsg: state.room.connection.message,
+    phase: state.room.phase,
     joinCode: state.room.id,
     announcement: state.room.announcement,
     num_players: state.room.num_players
