@@ -61,6 +61,25 @@ server.on("connect", (socket) => {
 			response(false, "Please reload the page and try again");
 		})
 	});
+	/* EVENT: player_leave
+	 * When a player manually leaves a game, they send this event to the server
+	 * Their session is deleted, then the server tells all other players
+	 * @broadcast player_leave
+	 *  - player_id: the game-specific id of the player who left
+	*/
+	socket.on("player_leave", () => {
+		auth.logout(session)
+		.then(player => {
+			socket.leave(`${player.GameId} players`, err => {
+				if(err) {
+					console.log("[EVENTS/player_leave] Error leaving room", err);
+				}
+				player.info("$NAME left");
+				socket.to(`${player.GameId} players`).emit("player_leave", player.player_id);
+			});
+		})
+		.catch(err => {});
+	});
 	/* EVENT: disconnect
 	 * This is fired when a socket disconnects from the server
 	 */
