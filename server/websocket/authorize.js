@@ -40,7 +40,7 @@ async function logout(session) {
 		delete session.game;
 		delete session.player;
 		console.log("[LOGOUT] logged player out");
-		return true;
+		return player;
 	} catch(err) {
 		console.log("[LOGOUT] Error logging player out: %j", session);
 		return false;
@@ -64,7 +64,18 @@ function getPlayer(session) {
 	             });
 }
 
+/**
+ * Retrieves the player and the game they're part of.
+ * @return  an array where the player is first, and the game is second
+ */
+async function getPlayerGame(session) {
+	let player = await getPlayer(session);
+	let game = await player.getGame();
+	return [player, game];
+}
+
 module.exports.isAuthorized = isAuthorized;
 module.exports.login = login;
 module.exports.logout = logout;
 module.exports.getPlayer = getPlayer;
+module.exports.getPlayerGame = getPlayerGame;

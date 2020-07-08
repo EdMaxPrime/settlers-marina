@@ -14,6 +14,7 @@ var game;
 //import all files here
 const gameEvents = require("./games");
 const chatEvents = require("./chat");
+const turnEvents = require("./turn");
 
 
 
@@ -50,6 +51,7 @@ function setup(app, session) {
 	//register events from files in this directory
 	gameEvents(game, socketIOLocals);
 	chatEvents(game, socketIOLocals);
+	turnEvents(game, socketIOLocals);
 	//return HTTP server
 	return server;
 }

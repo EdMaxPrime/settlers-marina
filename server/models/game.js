@@ -61,6 +61,67 @@ module.exports = (sequelize, DataTypes) => {
       return this.decrement("num_players");
     }
   };
+  /**
+   * Advances the game state to the next turn. Could involve changing the
+   * phase as well as the turn. This function is async!
+   * @return Promise<Game>
+   */
+  Game.prototype.nextTurn = function() {
+    switch(this.phase) {
+      case PHASE.LOBBY:
+        return this.update({phase: PHASE.SETUP1, turn_now: 0});
+        break;
+      case PHASE.SETUP1:
+        if(this.turn_now + 1 < this.num_players)
+          return this.increment("turn_now");
+        else
+          return this.update({phase: PHASE.SETUP2});
+        break;
+      case PHASE.SETUP2:
+        if(this.turn_now > 0)
+          return this.decrement("turn_now");
+        else
+          return this.update({phase: PHASE.REGULAR});
+        break;
+      case PHASE.REGULAR:
+        if(this.turn_now + 1 < this.num_players)
+          return this.increment("turn_now");
+        else
+          return this.update({turn_now: 0});
+        break;
+      default:
+        return this.update({phase: PHASE.LOBBY});
+    }
+  };
+  /**
+   * This is a lazy-loading function that can be used to retrieve the player
+   * whose turn it is now. If the phase is LOBBY or GAME_OVER, it is the host.
+   * Otherwise, this is determined by turn_now (relative ordering of players).
+   * Async!
+   * @throws  if player can't be found
+   * @return Promise<Player>
+   */
+  Game.prototype.getCurrentPlayer = function() {
+    let game = this;
+    let filter = {};
+    if(this.phase == PHASE.LOBBY || this.phase == PHASE.GAME_OVER) {
+      filter = {
+        where: {host: true}
+      };
+    } else {
+      filter = {
+        order: [["turn_order", "ASC"]],
+        limit: 1,
+        offset: this.turn_now
+      };
+    }
+    return this.getPlayers(filter)
+    .then(players => {
+      console.log("getCurrentPlayer(" + game.turn_now + ", " + game.phase + ") -> " + players.length);
+      if(players.length < 1) throw new Error("Couldn't get current player");
+      return players[0];
+    })
+  }
   /* Add constants and utilities here */
   Game.STATUS = STATUS;
   Game.PHASE = PHASE;
