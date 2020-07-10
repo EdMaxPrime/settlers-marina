@@ -1,6 +1,7 @@
 import * as Status from "./index";
 import axios from "axios";
 import {setStatus} from "./user";
+import {loadMap} from "./map";
 
 /********************************* ACTIONS ***********************************/
 
@@ -63,6 +64,7 @@ export function getRoomData(joinCode) {
       //correctly map players array to player numbers
       response.data.players = [null].concat(response.data.Players);
       dispatch(updateRoom(response.data));
+      dispatch(loadMap(response.data.MapId));
     })
     .catch(function(error) {
       dispatch(setRoomStatus(Status.ERROR, "Failed to join game"));
