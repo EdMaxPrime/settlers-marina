@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const {Game, Player, Map, sequelize} = require("../models");
+const {Game, Player, sequelize} = require("../models");
+const HexMap = require("../models").Map;
 
 /**
  * GET /api/games/<id>/info
@@ -11,7 +12,7 @@ router.get("/:id/info", function(req, res, next) {
 	let id = (req.params.id || "").toLowerCase();
 	console.log("Fetching game " + id);
 	//try to find this room in the database
-	Game.findByPk(id, {include:[Player, Map]}).then(game => {
+	Game.findByPk(id, {include:[Player]}).then(game => {
 		//found it
 		//add some extra fields for the response
 		game.joinCode = game.id;
@@ -21,6 +22,47 @@ router.get("/:id/info", function(req, res, next) {
 		//not found
 		res.status(404).send("Game not found");
 	});
+});
+
+/**
+ * GET /api/games/<id>/map
+ * Yields a JSON object describing the map's terrain, special objects and
+ * player-built structures.
+ * @request  nothing special
+ * @response  a JSON object with: name, description, robber, pirate,
+ *            width, height, tiles, harbors, buildings, roads
+ */
+router.get("/:id/map", function(req, res, next) {
+	let id = (req.params.id || "").toLowerCase();
+	console.log("[API/games/id/map] Fetching map for game " + id);
+	Game.findByPk(id, {
+		attributes: ["structures"],
+		include: [{
+			model: HexMap,
+			attributes: ["name", "description", "map_data"]
+		}]
+	})
+	.then(game => {
+		if(game == null) throw new Error("Game not found");
+		//found it
+		let shape = {
+			name: game.Map.name,
+			description: game.Map.description,
+			built: game.structures,
+			robber: -1, //replace with robber's current location
+			pirate: -1,
+			buildings: {},
+			roads: {},
+			...(game.Map.map_data)
+		};
+		for(let i in game.structures) {
+			let x = game.structures[i]; //x is for intersection
+			if(x.building != null) {
+				shape.buildings[i] = x.building;
+			}
+		}
+		res.json(shape);
+	})
 });
 
 /**

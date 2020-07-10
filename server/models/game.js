@@ -36,9 +36,22 @@ module.exports = (sequelize, DataTypes) => {
     phase:        {type: DataTypes.INTEGER, defaultValue: PHASE.LOBBY},
     seed:                DataTypes.INTEGER,
     deck:                DataTypes.STRING,
-    structures:   {type: DataTypes.TEXT,    defaultValue: ""},
     longest_road: {type: DataTypes.INTEGER, defaultValue: NOBODY},
-    largest_army: {type: DataTypes.INTEGER, defaultValue: NOBODY}
+    largest_army: {type: DataTypes.INTEGER, defaultValue: NOBODY},
+    structures:   {
+      type: DataTypes.TEXT,    
+      defaultValue: "{}",
+      get: function() {
+        try {
+          return JSON.parse(this.getDataValue("structures"));
+        } catch(error) {
+          return {};
+        }
+      },
+      set: function(data) {
+        this.setDataValue("structures", JSON.stringify(data));
+      }
+    }
   }, {});
   /* Define associations here */
   Game.associate = function(models) {
