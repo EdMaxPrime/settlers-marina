@@ -51,7 +51,7 @@ app.use((req, res, next) => {
 	}
 });
 app.use((err, req, res, next) => {
-	console.log("Caught error");
+	console.log("[app.js:54] Caught general route error");
 	console.error(err);
 	res.status(err.status || 500).send(err.message || "Internal server error.");
 });
