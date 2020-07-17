@@ -74,8 +74,24 @@ async function getPlayerGame(session) {
 	return [player, game];
 }
 
+/**
+ * This promise will resolve if it is your turn now. If it is not your turn,
+ * the promise will reject. Syntax:
+ *   myTurn(session).then(playerWithGame => {}).catch(not your turn)
+ */
+async function myTurn(session) {
+	let player = await getPlayer(session);
+	console.log("Game turn: " + player.Game.turn_now + ", player turn: " + player.turn_order);
+	if(player.Game.turn_now === player.turn_order) {
+		return player;
+	} else {
+		throw new Error("Not your turn");
+	}
+}
+
 module.exports.isAuthorized = isAuthorized;
 module.exports.login = login;
 module.exports.logout = logout;
 module.exports.getPlayer = getPlayer;
 module.exports.getPlayerGame = getPlayerGame;
+module.exports.myTurn = myTurn;

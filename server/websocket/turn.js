@@ -32,6 +32,41 @@ server.on("connect", socket => {
 			console.log("[EVENT/next] error doing next turn ", err);
 		}
 	});
+	socket.on("build", async (data, response) => {
+		console.log("[EVENT/build] %j", data);
+		try{
+			const player = await auth.myTurn(session);
+			let s = player.Game.structures;
+			let {phase} = player.Game;
+			let canBuild = false;
+			/* To build a settlement, you must meet all the criteria:
+			- during setup:
+			   - intersection doesn't exist or no building there
+			- during normal:
+			   - intersection exists
+			   - no other building there
+			   - you must have a road leading here */
+			if(data.what == "Stlm") {
+				if(phase == "SETUP1" || phase == "SETUP2") {
+					console.log("SETUP: ", s);
+					canBuild = !(data.where in s) || (s[data.where].building == null);
+				} else {
+					canBuild = (data.where in s) && (s[data.where].building == null) && (s[data.where].roads.some(r => r[0] == player.player_id));
+				}
+				if(canBuild) {
+					s[data.where] = s[data.where] || {building: null, roads: []};
+					s[data.where].building = [player.player_id, "Stlm"];
+				}
+			}
+			if(canBuild) {
+				await player.updateGame({structures: s});
+			}
+			response(canBuild);
+		} catch(err) {
+			console.log("Caught error building ", err);
+			response(false);
+		}
+	});
 });
 
 }
