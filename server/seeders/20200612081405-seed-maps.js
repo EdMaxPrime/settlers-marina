@@ -20,7 +20,7 @@ module.exports = {
       description: "Classic hexagon world for 3-4 players",
       thumbnail: null,
       //map_data: "V=1;WIDTH=7;HEIGHT=7;PROBABILITIES=mod10;HARBORS=W,15,16 C,44,37 H,33,34;TILES=OOOOOOOOOMrWOOOOHCrCOOHWDWMOOOWMHrOOOCHrOOOOOOOOO",
-      map_data: {version: 2, width: 7, height: 7, tiles: "OOOOOOOOOMGWOOOOHCGCOOHWDWMOOOWMHGOOOCHGOOOOOOOOO"},
+      map_data: {version: 2, width: 9, height: 9, tiles: "~~~~~~~~~~OOOOOOO~~OOMGWOO~~OHCGCOO~~OHWDWMO~~OWMHGOO~~OOCHGOO~~OOOOOOO~~~~~~~~~~"},
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
