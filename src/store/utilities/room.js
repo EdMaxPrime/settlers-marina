@@ -35,8 +35,8 @@ function updateRoom(room) {
 }
 
 /** Server-sent action dispatcher for "announcement" events */
-function announcement(message) {
-  announcement.dispatch(updateRoom({announcement: message}));
+export function announcement(message) {
+  return updateRoom({announcement: message});
 }
 
 /** Server-sent action dispatcher for "announcement" events */
@@ -78,7 +78,9 @@ export function getRoomData(joinCode) {
 export function subscribeToAnnouncements() {
   return function(dispatch, getStore, client) {
     announcement.dispatch = dispatch;
-    client.on("announcement", announcement);
+    client.on("announcement", function(a) {
+      dispatch(announcement(a));
+    });
     client.on("player_join", function(player) {
       dispatch({type: ADD_PLAYER, payload: player});
     });
@@ -100,7 +102,7 @@ export function subscribeToAnnouncements() {
  */
 export function unsubscribeFromAnnouncements() {
   return function(dispatch, getStore, client) {
-    client.off("announcement", announcement);
+    client.off("announcement");
     client.off("player_join");
     client.off("disconnect");
     client.off("next_turn");
