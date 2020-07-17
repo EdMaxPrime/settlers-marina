@@ -96,7 +96,7 @@ router.post("/:id/join", async function(req, res, next) {
 			color: Player.PLAYER_COLORS[pid],
 			status: Player.STATUS.JOINING,
 			host: false,
-			turn_order: pid
+			turn_order: game.num_players
 		}, {transaction: t});
 		await game.addPlayer(newPlayer, {transaction: t});
 		//update the number of players
@@ -144,7 +144,7 @@ router.post("/create", async function(req, res, next) {
 				color: Player.PLAYER_COLORS[1],
 				status: Player.STATUS.JOINING,
 				host: true,
-				turn_order: 1
+				turn_order: 0
 			}, {transaction: t});
 			return host;
 		});
