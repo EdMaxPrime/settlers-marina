@@ -11,6 +11,12 @@ const COLORS = {
   'O': "#007FDF"
 };
 
+//angles for hexagon corners
+const corners = [30, 90, 150, 210, 270, 330].map(angle => ({
+  x: Math.cos(angle * Math.PI / 180),
+  y: Math.sin(angle * Math.PI / 180)
+}));
+
 function Hexagon(props) {
   //check if it is possible to draw
   const ctx = useCanvas();
@@ -18,9 +24,9 @@ function Hexagon(props) {
   //if it is possible to draw...
   const {radius} = props;
   ctx.beginPath();
-  [30, 90, 150, 210, 270, 330].forEach((angle, index) => {
-    let x = props.x + radius * Math.cos(angle * Math.PI / 180),
-        y = props.y + radius * Math.sin(angle * Math.PI / 180);
+  corners.forEach((corner, index) => {
+    let x = props.x + radius * corner.x,
+        y = props.y + radius * corner.y;
     if(index == 0)
       ctx.moveTo(x, y);
     else
