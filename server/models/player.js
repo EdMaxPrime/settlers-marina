@@ -62,7 +62,15 @@ module.exports = (sequelize, DataTypes) => {
     await this.update({status: STATUS.DISCONNECTED, socket_id: null});
     const game = await this.getGame();
     return game.playerLeft();
-  }
+  };
+  /**
+   * Update properties of the game this player belongs to
+   */
+  Player.prototype.updateGame = function(newValues) {
+    return sequelize.model("Game").update(newValues, {
+      where: {id: this.GameId}
+    });
+  };
   /* Export constants */
   Player.STATUS = STATUS;
   Player.PLAYER_COLORS = PLAYER_COLORS;
