@@ -16,11 +16,19 @@ function getPlayers(state) { return state.room.players; }
 function getDefaultTurnOrder(state) { return state.room.order; }
 function getTurnIndex(state) { return state.room.turn_now; }
 export function getPhase(state) { return state.room.phase; }
+export function getAction(state) { return state.action; }
+function getPossible(state) { return state.map.possible; }
+function getBuildings(state) { return state.map.building; }
 
 export const getPlayerNames = createSelector(
 	[getPlayers],
 	function(players) {
 		return players.map(player => (player === null)? "?" : player.nickname);
+	});
+export const getPlayerColors = createSelector(
+	[getPlayers],
+	function(players) {
+		return players.map(player => (player === null)? "#444" : player.color);
 	});
 /* Returns an array of player objects that are connected and playing */
 export const filterActivePlayers = createSelector(
@@ -49,4 +57,23 @@ export const filterCurrentPlayer = createSelector(
 	[getPlayers, computeTurnNow],
 	function(players, index) {
 		return players[index];
+	});
+/* Returns an array of possible targets for the current action, could be empty*/
+export const filterPossibilities = createSelector(
+	[getAction, getPossible],
+	function(action, possible) {
+		return (action === null)? [] : possible[action];
+	});
+/* Returns an array of settlements: {color, intersection}*/
+export const filterSettlements = createSelector(
+	[getBuildings, getPlayerColors],
+	function(b, c) {
+		var result = [];
+		for(let intersection in b) {
+			result.push({
+				intersection: parseInt(intersection), 
+				color: c[ b[intersection][0] ]
+			});
+		}
+		return result;
 	});
