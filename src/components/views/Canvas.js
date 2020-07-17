@@ -2,6 +2,16 @@ import React from "react";
 
 const CanvasContext = React.createContext(null);
 const FrameContext = React.createContext(0);
+const MouseContext = React.createContext({x: 0, y: 0, inside: false, click:false});
+
+function getCanvasCoordinates(event, canvasRef) {
+	var boundingRect = canvasRef.current.getBoundingClientRect();
+	var scaleX = canvasRef.current.width  / canvasRef.current.clientWidth,
+	    scaleY = canvasRef.current.height / canvasRef.current.clientHeight;
+	var x = scaleX * (event.clientX - Math.round(boundingRect.left)),
+	    y = scaleY * (event.clientY - Math.round(boundingRect.top));
+	return {x: x, y: y};
+}
 
 /**
  * This is the default export. Children can draw on the canvas by accessing
@@ -45,17 +55,42 @@ function Canvas(props) {
 			}
 		}
 	}, [dpr]);
+	//Mouse State: x, y, inside.
+	const [mouseState, setMouseState] = React.useState({x:0, y:0, inside:false, click:false});
+	//mouse move event when mouse moves inside canvas
+	const onMouseMove = React.useCallback(event => {
+		if(canvasRef.current == null || !props.onMouseMove) return;
+		var coord = getCanvasCoordinates(event, canvasRef);
+		coord.inside = true;
+		//setMouseState(coord);
+		props.onMouseMove(coord);
+	}, [canvasRef.current, props.onMouseMove]);
 	//click handler function
-	const onClick = function(event) {
-		if(!props.onClick || canvasRef.current == null) return;
-		var boundingRect = canvasRef.current.getBoundingClientRect();
-		var scaleX = canvasRef.current.width  / canvasRef.current.clientWidth,
-		    scaleY = canvasRef.current.height / canvasRef.current.clientHeight;
-		var x = scaleX * (event.clientX - Math.round(boundingRect.left)),
-		    y = scaleY * (event.clientY - Math.round(boundingRect.top));
-		console.log(`Canvas clicked (${x}, ${y})`);
-		props.onClick({x: x, y: y});
-	};
+	const onClick = React.useCallback(event => {
+		if(canvasRef.current == null) return;
+		var coord = getCanvasCoordinates(event, canvasRef);
+		coord.inside = true;
+		coord.click = true;
+		setMouseState(coord);
+		if(props.onClick) 
+			props.onClick(coord);
+	}, [canvasRef.current, props.onClick]);
+	//keep track when mouse enters the canvas
+	const onMouseEnter = React.useCallback(event => {
+		if(canvasRef.current == null || !props.onMouseEnter) return;
+		var coord = getCanvasCoordinates(event, canvasRef);
+		coord.inside = true;
+		setMouseState(coord);
+		props.onMouseEnter(coord);
+	}, [canvasRef.current, props.onMouseEnter]);
+	//keep track when mouse leaves the canvas
+	const onMouseLeave = React.useCallback(event => {
+		if(canvasRef.current == null || !props.onMouseLeave) return;
+		var coord = getCanvasCoordinates(event, canvasRef);
+		coord.inside = false;
+		setMouseState(coord);
+		props.onMouseLeave(coord);
+	}, [canvasRef.current, props.onMouseLeave]);
 	//Animations
 	const [frameCount, setFrameCount] = React.useState(0);
 	React.useEffect(function() {
@@ -73,17 +108,30 @@ function Canvas(props) {
 	return (
 		<CanvasContext.Provider value={renderingContext}>
 		<FrameContext.Provider value={frameCount}>
+		<MouseContext.Provider value={mouseState}>
 			<canvas 
 				ref={canvasRef} 
 				width={Math.floor(dpr * props.width)}
 				height={Math.floor(dpr * props.height)}
 				style={{width: width + "px", height: height + "px"}}
 				onClick={onClick}
+				onMouseMove={onMouseMove}
+				onMouseEnter={onMouseEnter}
+				onMouseLeave={onMouseLeave}
 			/>
 			{props.children}
+		</MouseContext.Provider>
 		</FrameContext.Provider>
 		</CanvasContext.Provider>
 	);
+}
+
+/**
+ * Hook for functional components to read mouse state on the canvas.
+ * @return {x: number, y: number, inside: boolean}
+ */
+function useMouse() {
+	return React.useContext(MouseContext);
 }
 
 /**
@@ -158,4 +206,4 @@ function withCanvas(Component) {
 	};
 }
 
-export {Canvas as default, useCanvas, withCanvas, useAnimation, useCustomAnimation};
+export {Canvas as default, useCanvas, withCanvas, useAnimation, useCustomAnimation, useMouse};
