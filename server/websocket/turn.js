@@ -32,6 +32,28 @@ server.on("connect", socket => {
 			console.log("[EVENT/next] error doing next turn ", err);
 		}
 	});
+	/**
+	 * EVENT: skip_turn
+	 * This event should be fired by a host. Nothing will happen if a non-host
+	 * player does it. The game will advance to the next state, which will
+	 * modify the turn and maybe the phase. An announcement is made.
+	 * @broadcast next_turn
+	 */
+	socket.on("skip_turn", async () => {
+		console.log("[EVENT/skip] received request to skip current turn");
+		try {
+			let [player, game] = await auth.getPlayerGame(session);
+			//check to see if the event emitter is a host
+			if(player.host) {
+				game.announcement("Skipping to next player");
+				await game.nextTurn();
+				server.to(`${game.id} players`).emit("next_turn", game.phase, game.turn_now);
+			}
+		}
+		catch(err) {
+			console.log("[EVENT/skip] error skipping turn ", err);
+		}
+	})
 	socket.on("build", async (data, response) => {
 		console.log("[EVENT/build] %j", data);
 		try{
@@ -48,7 +70,6 @@ server.on("connect", socket => {
 			   - you must have a road leading here */
 			if(data.what == "Stlm") {
 				if(phase == "SETUP1" || phase == "SETUP2") {
-					console.log("SETUP: ", s);
 					canBuild = !(data.where in s) || (s[data.where].building == null);
 				} else {
 					canBuild = (data.where in s) && (s[data.where].building == null) && (s[data.where].roads.some(r => r[0] == player.player_id));
