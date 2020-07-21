@@ -21,6 +21,8 @@ server.on("connect", (socket) => {
 	 * @response
 	 *   - joined: true if you are subscribed to updates for the game,
 	 *             false if you couldn't be added to the game.
+	 * @broadcast  "player_join" IF you succesfully joined. Event data is your
+	 *   player data as JSON.
 	 */
 	socket.on("request_join", (token, response) => {
 		console.log("games.js:24 Player=", Player);
@@ -64,12 +66,16 @@ server.on("connect", (socket) => {
 	/* EVENT: player_leave
 	 * When a player manually leaves a game, they send this event to the server
 	 * Their session is deleted, then the server tells all other players
+	 * @request
+	 *  - callback: a function to be called after this event was processed
+	 * @response   no arguments
 	 * @broadcast player_leave
 	 *  - player_id: the game-specific id of the player who left
 	*/
-	socket.on("player_leave", () => {
+	socket.on("player_leave", (callback) => {
 		auth.logout(session)
 		.then(player => {
+			if(player == false) return; //invalid event, do nothing
 			socket.leave(`${player.GameId} players`, err => {
 				if(err) {
 					console.log("[EVENTS/player_leave] Error leaving room", err);
@@ -78,7 +84,11 @@ server.on("connect", (socket) => {
 				socket.to(`${player.GameId} players`).emit("player_leave", player.player_id);
 			});
 		})
-		.catch(err => {});
+		.catch(err => {
+			console.log("[EVENT/player_leave] failed to log player out");
+			console.error(err);
+		})
+		.finally(callback);
 	});
 	/* EVENT: disconnect
 	 * This is fired when a socket disconnects from the server
