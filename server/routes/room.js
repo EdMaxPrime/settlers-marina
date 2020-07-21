@@ -69,7 +69,8 @@ router.get("/:id/map", function(req, res, next) {
  * POST /api/games/<id>/join
  * If the game exists, and can fit more players, you will be registered to the
  * database.
- * @request   nothing special
+ * @request   a JSON object with the following fields:
+ *   - socket.io: your socket.io client's unique identifier
  * @response  your player data as JSON
  * @error     if game is full, or DNE, you'll get 404
  */
@@ -86,19 +87,39 @@ router.post("/:id/join", async function(req, res, next) {
 		//if game can't fit more players, stop
 		if(game.num_players >= game.max_players)
 			throw new Error("This game is full");
-		let pid = game.num_players + 1;
+		//begin database transaction
 		t = await sequelize.transaction();
-		//add player to game
-		const newPlayer = await Player.create({
-			socket_id: req.body["socket.io"],
-			player_id: pid,
-			nickname: "Player" + pid,
-			color: Player.PLAYER_COLORS[pid],
-			status: Player.STATUS.JOINING,
-			host: false,
-			turn_order: game.num_players
-		}, {transaction: t});
-		await game.addPlayer(newPlayer, {transaction: t});
+		var newPlayer = null;
+		//try to see if this person was already in the game
+		if(req.session && typeof req.session.player == "number") {
+			let oldPlayer = await game.getPlayers({
+				where: {id: req.session.player},
+				transaction: t
+			});
+			if(oldPlayer.length == 1) {
+				newPlayer = oldPlayer[0];
+				await newPlayer.update({
+					socket_id: req.body["socket.io"],
+					status: Player.STATUS.JOINING,
+					turn_order: game.num_players
+				}, {transaction: t});
+			}
+		}
+		//if this person was not reconnecting to the game, then create a new Player
+		if(newPlayer == null) {
+			let pid = game.num_players + 1;
+			//add player to game
+			newPlayer = await game.createPlayer({
+				socket_id: req.body["socket.io"],
+				player_id: pid,
+				nickname: "Player" + pid,
+				color: Player.PLAYER_COLORS[pid],
+				status: Player.STATUS.JOINING,
+				host: false,
+				turn_order: game.num_players
+			}, {transaction: t});
+			await game.addPlayer(newPlayer, {transaction: t});
+		}
 		//update the number of players
 		await game.increment("num_players", {transaction: t});
 		//save changes to database

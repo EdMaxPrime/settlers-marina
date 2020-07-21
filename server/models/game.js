@@ -65,13 +65,55 @@ module.exports = (sequelize, DataTypes) => {
   Game.prototype.announcement = function(message) {
     utils.announcement(this.id, message);
   };
-  Game.prototype.playerLeft = function() {
+  /**
+   * Async!
+   * This function should be used to notify a game instance that some player
+   * disconnect(). The player should have set their status to DISCONNECTED.
+   * This function will destroy the game record in the database if everyone
+   * left, or update the turn order if active players remain.
+   * @param player  the Player instance who just disconnected
+   * @return  Promise<Game>  this same game instance
+   */
+  Game.prototype.playerLeft = async function(player) {
     if(this.num_players <= 1) {
       console.log("[GAME] destroying model since players left");
       return this.destroy();
     } else {
       console.log("[GAME] decrement num_players: " + this.num_players);
-      return this.decrement("num_players");
+      const Player = sequelize.model("Player");
+      const {Op} = require("sequelize");
+      const t = await sequelize.transaction();
+      try {
+        //decrement number of active players
+        await this.decrement("num_players", {transaction: t});
+        //the player left a hole in the turn order, so shift all other players
+        await Player.decrement("turn_order", {
+          transaction: t,
+          where: {
+            GameId: this.id,
+            turn_order: {[Op.gt]: player.turn_order}
+          }
+        });
+        //if the player who left was a host, then find a new host
+        //smallest player_id still in the game
+        if(player.host === true) {
+          let newHost = await Player.min("player_id", {
+            transaction: t,
+            where: {
+              GameId: this.id,
+              status: Player.STATUS.JOINED
+            }
+          });
+          if(newHost != null) {
+            await (newHost.set("host", true)).save({transaction: t});
+          }
+        }
+        await t.commit();
+      } catch(error) {
+        console.log("[Game.playerLeft()] rolling back transaction");
+        console.error(error);
+        t.rollback();
+      }
     }
   };
   /**
@@ -88,7 +130,7 @@ module.exports = (sequelize, DataTypes) => {
         if(this.turn_now + 1 < this.num_players)
           return this.increment("turn_now");
         else
-          return this.update({phase: PHASE.SETUP2});
+          return this.update({phase: PHASE.SETUP2, turn_now: this.num_players-1});
         break;
       case PHASE.SETUP2:
         if(this.turn_now > 0)
@@ -119,13 +161,17 @@ module.exports = (sequelize, DataTypes) => {
     let filter = {};
     if(this.phase == PHASE.LOBBY || this.phase == PHASE.GAME_OVER) {
       filter = {
-        where: {host: true}
+        where: {
+          host: true,
+          status: sequelize.model("Player").STATUS.JOINED
+        }
       };
     } else {
       filter = {
         order: [["turn_order", "ASC"]],
         limit: 1,
-        offset: this.turn_now
+        offset: this.turn_now,
+        where: {status: sequelize.model("Player").STATUS.JOINED}
       };
     }
     return this.getPlayers(filter)

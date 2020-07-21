@@ -59,9 +59,12 @@ module.exports = (sequelize, DataTypes) => {
     utils.announcement(this.GameId, message);
   };
   Player.prototype.disconnect = async function() {
-    await this.update({status: STATUS.DISCONNECTED, socket_id: null});
+    await this.update({
+      status: STATUS.DISCONNECTED, 
+      socket_id: null
+    });
     const game = await this.getGame();
-    return game.playerLeft();
+    return game.playerLeft(this);
   };
   /**
    * Update properties of the game this player belongs to
