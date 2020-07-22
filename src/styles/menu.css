@@ -26,6 +26,16 @@ input[type="text"] {
 	padding: 5px 10px;
 }
 
+.menu-container button:disabled {
+	cursor: not-allowed;
+	background-color: #999;
+}
+
+.menu-container button:disabled:hover {
+	cursor: not-allowed;
+	background-color: #999;
+}
+
 /*#6D9C5 is another color*/
 .menu-container button:hover {
 	background-color: #AEEAE7;
