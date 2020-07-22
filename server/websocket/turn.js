@@ -20,7 +20,8 @@ server.on("connect", socket => {
 			let [player, game] = await auth.getPlayerGame(session);
 			//check to see if the event emitter is the person whose turn it is
 			let currentPlayer = await game.getCurrentPlayer();
-			if(currentPlayer.player_id != player.player_id) return;
+			if(currentPlayer.player_id != player.player_id) {
+				console.log("[EVENT/next_turn] Not your turn! Can't do next turn"); return;}
 			console.log("[EVENT/next] Before phase="+game.phase+" turn="+game.turn_now);
 			await game.nextTurn();
 			console.log("[EVENT/next] After phase="+game.phase+" turn="+game.turn_now);
