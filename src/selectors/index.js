@@ -17,7 +17,7 @@ function getTurnIndex(state) { return state.room.turn_now; }
 export function getPhase(state) { return state.room.phase; }
 export function getAction(state) { return state.action; }
 function getPossible(state) { return state.map.possible; }
-function getBuildings(state) { return state.map.building; }
+function getBuildings(state) { return state.map.buildings; }
 
 export const getPlayerNames = createSelector(
 	[getPlayers],
