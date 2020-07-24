@@ -113,7 +113,7 @@ router.post("/:id/join", async function(req, res, next) {
 				socket_id: req.body["socket.io"],
 				player_id: pid,
 				nickname: "Player" + pid,
-				color: Player.PLAYER_COLORS[pid],
+				color: Player.PLAYER_COLORS[pid % 8],
 				status: Player.STATUS.JOINING,
 				host: false,
 				turn_order: game.num_players
