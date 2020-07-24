@@ -8,6 +8,7 @@ import {loadMap} from "./map";
 const SET_STATUS = "SET_STATUS";
 const UPDATE_ROOM = "UPDATE_ROOM";
 const ADD_PLAYER = "ADD_PLAYER";
+const UPDATE_PLAYER = "UPDATE_PLAYER";
 const REMOVE_PLAYER = "REMOVE_PLAYER";
 
 // ACTION CREATORS
@@ -92,7 +93,10 @@ export function subscribeToAnnouncements() {
     });
     client.on("next_turn", function(phase, turn) {
       console.log("received next_turn event: phase=" + phase + ", turn=" + turn);
-      dispatch(updateRoom({phase: phase, turn: turn}));
+      dispatch(updateRoom({phase: phase, turn_now: turn}));
+    });
+    client.on("player_change", function(data) {
+      dispatch({type: UPDATE_PLAYER, who: data.player_id, payload: data});
     });
   }
 }
@@ -106,6 +110,7 @@ export function unsubscribeFromAnnouncements() {
     client.off("player_join");
     client.off("disconnect");
     client.off("next_turn");
+    client.off("player_change");
   }
 }
 
@@ -128,6 +133,12 @@ export function nextTurn() {
   }
 }
 
+export function skipTurn() {
+  return function(dispatch, getStore, client) {
+    client.emit("skip_turn");
+  }
+}
+
 /********************************* REDUCER ***********************************/
 const initialState = {
   connection: {
@@ -141,8 +152,7 @@ const initialState = {
   winner: -1,
   host: -1,
   announcement: "",
-  players: [null],
-  order: []
+  players: [null]
 };
 
 export default function roomReducer(state = initialState, action) {
@@ -155,29 +165,46 @@ export default function roomReducer(state = initialState, action) {
         }
       });
     case UPDATE_ROOM:
-      let a = Object.assign({}, state, action.payload);
-      a.order = a.players.filter(player => player != null && player.status === "JOINED")
-      .sort((p1, p2) => p1.turn_order - p2.turn_order)
-      .map(player => player.player_id);
-      return a;
+      return Object.assign({}, state, action.payload);
     case ADD_PLAYER:
       let p = state.players.slice();
       p[action.payload.player_id] = action.payload;
       return Object.assign({}, state, {
         num_players: state.num_players + 1,
-        players: p,
-        order: state.order.concat(action.payload.player_id)
+        players: p
+      });
+    case UPDATE_PLAYER:
+      return Object.assign({}, state, {
+        players: state.players.map(player => {
+          if(player !== null && player.player_id === action.who) {
+            return Object.assign({}, player, action.payload)
+          } else {
+            return player;
+          }
+        })
       });
     case REMOVE_PLAYER:
+      let o = Infinity;
+      if(state.players[action.payload] !== null) o=state.players[action.payload].turn_order;
       return Object.assign({}, state, {
         num_players: state.num_players - 1,
         players: state.players.map(function(player) {
-          return (player !== null && player.player_id === action.payload)? null : player;
-        }),
-        order: state.order.filter(function(t) {
-          return t !== action.payload;
+          //if player was already deleted OR is the one being removed, replace with null
+          if(player === null || player.player_id === action.payload) {
+            return null;
+          }
+          //fill in the hole in the turn order left by the missing player
+          else if(player.turn_order > o) {
+            return Object.assign({}, player, {
+              turn_order: player.turn_order - 1
+            });
+          }
+          //otherwise, don't change this player
+          return player;
         })
       });
+    case "RESET":
+      return initialState;
     default:
       return state;
   }
