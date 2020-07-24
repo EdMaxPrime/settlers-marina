@@ -7,7 +7,6 @@ import {announcement} from "./room";
 
 const SET_STATUS = "SET_MAP_STATUS";
 const SET_MAP = "SET_MAP";
-const BUILD = "BUILD";
 
 // ACTION CREATORS
 /**
@@ -77,6 +76,9 @@ export function buildSettlement(intersection) {
   };
 }
 
+/**
+ * Subscribe to map updates. Should be called AFTER map has been loaded.
+ */
 export function subscribeToMap() {
   return function(dispatch, getStore, client) {
     client.on("build", function(data) {
@@ -85,7 +87,10 @@ export function subscribeToMap() {
   }
 }
 
-export function unsubscribeToMap() {
+/**
+ * Unsubscribe to map updates
+ */
+export function unsubscribeFromMap() {
   return function(dispatch, getStore, client) {
     client.off("build");
   }
@@ -121,7 +126,7 @@ function World(m) {
     if(dir === undefined) {
       obj.repr = tile;
       obj.tile = Math.floor(obj.repr / 2);
-      obj.dir = (obj.repr % 2 == 0)? -1 : 1;
+      obj.dir = (obj.repr % 2 === 0)? -1 : 1;
     } else {
       obj.repr = tile * 2 + ((dir === 1)? 1 : 0);
       obj.tile = tile;
@@ -168,7 +173,7 @@ function World(m) {
       return [Hex(h1), Hex(h2)];
     };
     let h = obj.hexagons();
-    if(h[0].row == h[1].row)
+    if(h[0].row === h[1].row)
       obj.dir = "|";
     else if(h[0].col > h[1].col)
       obj.dir = "\\";
@@ -179,7 +184,7 @@ function World(m) {
     obj.shore = obj.land && obj.ocean;
     obj.intersections = function() {
       let h = obj.hexagons();
-      if(obj.dir == "|")
+      if(obj.dir === "|")
         return [Intersection(Hex(h[0].row-1, h[1].col+1).repr, 1),
                 Intersection(Hex(h[0].row+1, h[1].col+1).repr, -1)];
       else
@@ -191,7 +196,6 @@ function World(m) {
   mobj.hexagons = function(callback) {
     for(let i = 0; i < m.width * m.height; i++) {
       let h = mobj.Hex(i);
-      console.log(`Hexagon ${h.repr} (${h.row}, ${h.col}) = ${h.tile}`);
       callback(h);
     }
   };
