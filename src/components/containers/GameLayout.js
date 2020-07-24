@@ -8,6 +8,7 @@ import Chat from "./Chat";
 import Status from "../views/Status";
 import PlayerList from "./PlayerList";
 import GameSettings from "./GameSettings";
+import ActionPanel from "./ActionPanel";
 import TileMap from "./Map";
 import "../../styles/gameLayout.css"
 
@@ -52,6 +53,7 @@ class GameLayout extends Component {
           </div>
           <div>
             <PlayerList />
+            <ActionPanel />
             <Chat />
           </div>
         </div>
