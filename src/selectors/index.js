@@ -13,7 +13,6 @@ Naming convention:
 
 function getSelf(state) { return state.user.playerID; }
 function getPlayers(state) { return state.room.players; }
-function getDefaultTurnOrder(state) { return state.room.order; }
 function getTurnIndex(state) { return state.room.turn_now; }
 export function getPhase(state) { return state.room.phase; }
 export function getAction(state) { return state.action; }
@@ -29,6 +28,18 @@ export const getPlayerColors = createSelector(
 	[getPlayers],
 	function(players) {
 		return players.map(player => (player === null)? "#444" : player.color);
+	});
+/**
+ * A selector function to extract the correct ordering of players from an
+ * array of player objects. Returns an array of player_ids, ordered by
+ * turn_order.
+ */
+const getDefaultTurnOrder = createSelector(
+	[getPlayers],
+	function(players) {
+		return players.filter(player => player != null && player.status === "JOINED")
+		.sort((p1, p2) => p1.turn_order - p2.turn_order)
+		.map(player => player.player_id);
 	});
 /* Returns an array of player objects that are connected and playing */
 export const filterActivePlayers = createSelector(
@@ -46,7 +57,7 @@ export const filterMyPlayer = createSelector(
 export const amIHost = createSelector(
 	[filterMyPlayer],
 	function(me) {
-		return me.host;
+		return me != null && me.host;
 	});
 export const computeTurnNow = createSelector(
 	[getDefaultTurnOrder, getTurnIndex],
@@ -57,6 +68,12 @@ export const filterCurrentPlayer = createSelector(
 	[getPlayers, computeTurnNow],
 	function(players, index) {
 		return players[index];
+	});
+/* Returns true if it is your turn, false otherwise */
+export const amIPlaying = createSelector(
+	[filterCurrentPlayer, filterMyPlayer],
+	function(c, me) {
+		return c == me;
 	});
 /* Returns an array of possible targets for the current action, could be empty*/
 export const filterPossibilities = createSelector(
