@@ -33,6 +33,11 @@ function updatePlayer(playerID) {
 
 /********************************* THUNKS ***********************************/
 
+/**
+ * Phase 2 of joining a room. This async action should only be called from
+ * requestJoinRoom(). Expects nothing about the state of the user slice. Will
+ * modify the user's status, playerID, and then ask the room to begin loading.
+ */
 function connectToRoom(joinCode) {
   return function(dispatch, getStore, client) {
     console.log(`connectToRoom(joinCode=${joinCode})`);
@@ -49,8 +54,16 @@ function connectToRoom(joinCode) {
   };
 }
 
+/**
+ * This async action is the only way to initiate the process of joining a
+ * game. Do not call it more than once until a response is received!
+ * On success, phase of joining a game connectToRoom() proceeds. On error, the
+ * error status and message will be set HERE and NOT on the room slice.
+ * @param joinCode {String}  the unique identifier of the game you're joining
+ */
 export function requestJoinRoom(joinCode) {
   return function(dispatch, getStore, client) {
+    dispatch({type: "RESET"});
     dispatch(setStatus(Status.CONNECTING, "Searching for game..."));
     axios.post(`/api/games/${joinCode}/join`, {
       "socket.io": client.id
@@ -91,19 +104,16 @@ export function createRoom() {
   }
 }
 
-export function joinRoom(joinCode, playerID) {
-  console.log(`joinRoom(joinCode=${joinCode}, playerID=${playerID})`);
+/**
+ * This is an async action that will cause this player to leave the game. Any
+ * remaining data in the redux global store should be considered invalid.
+ * Even if you rejoin the same game, all this data will be refreshed anyway.
+ * This action can safely be called even when not in a game, nothing happens.
+ */
+export function leaveRoom() {
   return function(dispatch, getStore, client) {
-    console.log("join room async thunk: client: " + client.id);
-    dispatch(setStatus(Status.CONNECTING, "Joining game..."))
-    client.emit("player_join", joinCode, playerID, (joined, playerID) => {
-      if(joined) {
-        dispatch(setStatus(Status.CONNECTED, "Loading Players"));
-        dispatch(updatePlayer(playerID));
-        dispatch(getRoomData(joinCode));
-      } else {
-        dispatch(setStatus(Status.ERROR, "Couldn't join game. The game may be full, or it may have already started, or you may have mistyped the code."));
-      }
+    client.emit("player_leave", () => {
+      dispatch(setStatus(Status.DISCONNECTED, "You left the game " + getStore().room.id));
     });
   }
 }
@@ -126,6 +136,8 @@ export default function userReducer(state = initialState, action) {
       return Object.assign({}, state, {
         playerID: action.playerID
       });
+    case "RESET":
+      return initialState;
     default:
       return state;
   }
