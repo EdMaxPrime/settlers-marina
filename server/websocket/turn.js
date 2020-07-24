@@ -82,6 +82,7 @@ server.on("connect", socket => {
 			}
 			if(canBuild) {
 				await player.updateGame({structures: s});
+				socket.to(`${player.GameId} players`).emit("build", data); //alert everyone
 			}
 			response(canBuild);
 		} catch(err) {
