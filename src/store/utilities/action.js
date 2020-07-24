@@ -18,6 +18,8 @@ export default function actionReducer(state = initialState, action) {
   switch (action.type) {
     case SET_ACTION:
       return action.action;
+    case "RESET":
+      return null;
     default:
       return state;
   }

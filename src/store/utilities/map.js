@@ -270,6 +270,7 @@ function buildingsReducer(state = {}, action) {
       [action.where]: [action.who, action.type]
     };
   }
+  else if(action.type === "RESET") return {};
   return state;
 }
 /** Updates map.roads:
@@ -287,6 +288,7 @@ function roadsReducer(state = {}, action) {
       [loc]: [action.who, action.type]
     };
   }
+  else if(action.type === "RESET") return {};
   return state;
 }
 
@@ -313,6 +315,9 @@ function possibleReducer(map, action) {
     changes.settlement = prev.settlement.filter((intersection) => {
       return illegal.indexOf(intersection) === -1;
     });
+  }
+  else if(action.type === "RESET") {
+    changes.settlement = [];
   }
   //return changes
   return Object.assign({}, prev, changes);

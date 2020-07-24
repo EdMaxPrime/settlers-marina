@@ -58,14 +58,7 @@ export function clearChat() {
 }
 
 /********************************* REDUCER ***********************************/
-const initialState = [
-  {type: "msg", message: "welcome!", from: 1},
-  {type: "msg", message: "I'm 2", from: 2},
-  {type: "msg", message: "Hi 2", from: 1},
-  {type: "msg", message: "lorem ipsum dolor sit amet consequtor", from: 3},
-  {type: "msg", message: "lorem ipsum dolor sit amet consequtor", from: 3},
-  {type: "info", message: "Game is starting"}
-];
+const initialState = [];
 
 export default function userReducer(state = initialState, action) {
   switch (action.type) {
@@ -73,6 +66,8 @@ export default function userReducer(state = initialState, action) {
       return state.concat(action.payload);
     case CLEAR_CHAT:
       return [];
+    case "RESET":
+      return initialState;
     default:
       return state;
   }
