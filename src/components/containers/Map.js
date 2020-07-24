@@ -2,11 +2,12 @@ import React, {Component} from "react";
 import {connect} from "react-redux";
 
 import {subscribeToMap, unsubscribeFromMap, buildSettlement} from "../../actions";
-import {filterPossibilities} from "../../selectors";
+import {filterPossibilities, filterSettlements} from "../../selectors";
 
 import Canvas from "../views/Canvas";
 import Hexagon from "../views/Hexagon";
 import Clickable from "../views/Clickable";
+import Settlement from "../views/Settlement";
 import Status from "../views/Status";
 
 //cosine of 30 degrees
@@ -22,16 +23,22 @@ class TileMap extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      radius: Math.min(600 / (2 * props.w + 1), 400 / ((props.h + 1) * 1.5)),
+      radius: Math.min(600 / (2 * props.w), 400 / ((props.h) * 1.5)),
       width: 600,
       height: 400
     };
     this.doAction = this.doAction.bind(this);
   }
+  componentDidMount() {
+    this.props.setup();
+  }
+  componentWillUnmount() {
+    this.props.cleanup();
+  }
   componentDidUpdate(prevProps) {
     if(prevProps.w != this.props.w || prevProps.h != this.props.h) {
       this.setState({
-        radius: Math.min(600 / (2 * this.props.w + 1), 400 / ((this.props.h + 1) * 1.5))
+        radius: Math.min(600 / (2 * this.props.w), 400 / ((this.props.h) * 1.5))
       });
     }
   }
@@ -78,9 +85,18 @@ class TileMap extends Component {
                         onClick={this.doAction}
              />
     });
+    const settlements = this.props.settlements.map((settlement, index) => {
+      let coords = this.intersectionCoords(settlement.intersection);
+      return <Settlement key={index}
+                         x={coords.x}
+                         y={coords.y}
+                         color={settlement.color}
+             />;
+    });
     return (
       <Canvas width={this.state.width} height={this.state.height} bg={"#334499"}>
         {tiles}
+        {settlements}
         {clickables}
       </Canvas>
     );
@@ -96,14 +112,16 @@ const mapStateToProps = (state) => {
     h: state.map.height,
     action: state.action,
     possible: filterPossibilities(state),
-    buildings: state.map.buildings,
+    settlements: filterSettlements(state),
     roads: state.map.roads
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    buildSettlement: (intersection) => dispatch(buildSettlement(intersection))
+    buildSettlement: (intersection) => dispatch(buildSettlement(intersection)),
+    setup: () => dispatch(subscribeToMap()),
+    cleanup: () => dispatch(unsubscribeFromMap())
   };
 };
 
