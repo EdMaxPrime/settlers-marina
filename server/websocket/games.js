@@ -25,7 +25,6 @@ server.on("connect", (socket) => {
 	 *   player data as JSON.
 	 */
 	socket.on("request_join", (token, response) => {
-		console.log("games.js:24 Player=", Player);
 		console.log("Player Join event socket="+socket.id);
 		//find in Players table
 		auth.login(session)
@@ -53,7 +52,6 @@ server.on("connect", (socket) => {
 				player.announcement("Waiting for host to start game. Invite others with: $GAME");
 			});
 			//tell everyone about the new player
-			console.log("[EVENT/request_join] telling everyone on " + rooms[0]);
 			socket.to(rooms[0]).emit("player_join", player.toJSON());
 		})
 		//if this person is registered for the game
