@@ -73,8 +73,23 @@ function announcement(gameID, message) {
 	game.to(`${gameID} players`).emit("announcement", message);
 }
 
+/**
+ * @param gameID {string}  the unique identifier for the game
+ * @param player_id {number}  the identifier of the player whose data changed
+ * @param data {object}  can have any of the following fields:
+ *   - nickname: {string}
+ *   - color: {string} enumerated value
+ *   - turn_order: {int} from 0 to game.num_players-1
+ *   - host: {boolean} true if this player has host privileges, false if no
+ */
+function playerChanged(gameID, player_id, data) {
+	data.player_id = player_id;
+	game.to(`${gameID} players`).emit("player_change", data);
+}
+
 //exported functions
 module.exports.setup = setup;
 module.exports.chat  = chat;
 module.exports.info  = info;
 module.exports.announcement = announcement;
+module.exports.playerChanged = playerChanged;

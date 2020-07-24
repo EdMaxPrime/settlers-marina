@@ -112,6 +112,7 @@ module.exports = (sequelize, DataTypes) => {
                 player_id: newHost
               }
             });
+            utils.playerChanged(this.id, newHost, {host: true}); //alert everyone
           }
         }
         await t.commit();
