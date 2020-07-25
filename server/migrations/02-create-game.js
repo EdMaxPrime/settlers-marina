@@ -36,7 +36,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       structures: {
-        type: Sequelize.TEXT
+        type: Sequelize.JSON
       },
       longest_road: {
         type: Sequelize.INTEGER
