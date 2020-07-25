@@ -1,0 +1,91 @@
+/*
+How to use a card: Everything is required unless marked optional
+<div class="card">
+	<img class="card-image" /> (optional)
+	<div class="card-body">
+		<h4 class="card-title">Title text</h4> (optional)
+		<p class="card-text">description</p> (optional)
+		<button>button text</button> (optional)
+	</div>
+</div>
+*/
+
+div.card {
+	position: relative;
+	/*display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-orient: vertical;
+	-webkit-box-direction: normal;
+	-ms-flex-direction: column;
+	flex-direction: column;
+	min-width: 0;*/
+	display: inline-block;
+	width: 200px;
+	word-wrap: break-word;
+	background-color: #fff;
+	background-clip: border-box;
+	border: 1px solid rgba(0,0,0,.5);
+	border-radius: .25rem;
+	box-sizing: border-box;
+	color: black;
+}
+
+.card-image {
+	width: 100%;
+	display: block;
+	border-top-left-radius: .25rem;
+	border-top-right-radius: .25rem;
+	vertical-align: middle;
+	box-sizing: border-box;
+}
+
+.card-body {
+	-webkit-box-flex: 1;
+	-ms-flex: 1 1 auto;
+	flex: 1 1 auto;
+	padding: 1.25rem;
+	box-sizing: border-box;
+}
+
+.card-title {
+	margin-top: 0;
+	margin-bottom: .75rem;
+	font-size: 1.25rem;
+	line-height: 1.2;
+}
+
+.card-text {
+	margin-top: 0;
+	margin-bottom: 1rem;
+}
+
+.card button {
+	background-color: #80DED9;
+	color: black;
+	border-radius: 0px;
+	border: none;
+	font-size: 1em;
+	padding: 5px 10px;
+}
+
+.card button:disabled {
+	cursor: not-allowed;
+	background-color: #999;
+}
+
+.card button:disabled:hover {
+	cursor: not-allowed;
+	background-color: #999;
+}
+
+/*#6D9C5 is another color*/
+.card button:hover {
+	background-color: #AEEAE7;
+}
+
+/** Card List **/
+div.card-list {
+	text-align: left;
+	width: 600px;
+}
