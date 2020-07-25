@@ -1,4 +1,4 @@
-import React, {Component} from "react";
+import React, {Component, Fragment} from "react";
 import {connect} from "react-redux";
 
 import {subscribeToAnnouncements, unsubscribeFromAnnouncements} from "../../actions";
@@ -10,6 +10,7 @@ import PlayerList from "./PlayerList";
 import GameSettings from "./GameSettings";
 import ActionPanel from "./ActionPanel";
 import TileMap from "./Map";
+import Shop from "./Shop";
 import "../../styles/gameLayout.css"
 
 class GameLayout extends Component {
@@ -49,7 +50,11 @@ class GameLayout extends Component {
         </div>
         <div className="columns">
           <div>
-            {this.props.phase == "LOBBY"? <GameSettings /> : <TileMap />}
+            {this.props.phase == "LOBBY"? <GameSettings /> : 
+            <Fragment>
+              <TileMap />
+              <Shop />
+            </Fragment>}
           </div>
           <div>
             <PlayerList />
