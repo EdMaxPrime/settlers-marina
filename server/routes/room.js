@@ -12,7 +12,10 @@ router.get("/:id/info", function(req, res, next) {
 	let id = (req.params.id || "").toLowerCase();
 	console.log("Fetching game " + id);
 	//try to find this room in the database
-	Game.findByPk(id, {include:[Player]}).then(game => {
+	Game.findByPk(id, {include:[{
+		model: Player,
+		attributes: {exclude: ["createdAt", "updatedAt", "socket_id", "GameId", "id"]}
+	}]}).then(game => {
 		//found it
 		//add some extra fields for the response
 		game.joinCode = game.id;
