@@ -6,7 +6,7 @@ import Card from "../views/Card";
 import Collapsible from "./Collapsible";
 import settlement from "../../images/settlement.png";
 
-import {amIPlaying} from "../../selectors";
+import {amIPlaying, filterMyPlayer} from "../../selectors";
 import {setAction} from "../../actions";
 
 class Shop extends Component {
@@ -16,7 +16,8 @@ class Shop extends Component {
   }
   render() {
     let a = this.props.action === null;
-    return <Collapsible title="Shop" subtitle="4 wood">
+    var {wood, clay, iron, harvest, gold} = this.props.res || {wood:0,clay:0,iron:0,harvest:0,gold:0};
+    return <Collapsible title="Shop" subtitle={`${wood} wood, ${clay} clay, ${iron} iron, ${harvest} harvests, ${gold} gold`}>
       <CardList>
         <Card title="Settlement"
               image={settlement}
@@ -47,7 +48,8 @@ class Shop extends Component {
 const mapStateToProps = state => {
   return {
     action: state.action,
-    notMyTurn: !amIPlaying(state)
+    notMyTurn: !amIPlaying(state),
+    res: filterMyPlayer(state)
   };
 };
 
