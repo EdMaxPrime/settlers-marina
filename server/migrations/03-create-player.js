@@ -23,7 +23,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       status: {
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
       },
       host: {
         type: Sequelize.INTEGER
@@ -31,6 +31,11 @@ module.exports = {
       turn_order: {
         type: Sequelize.INTEGER
       },
+      wood: {type: Sequelize.INTEGER, defaultValue: 0, allowNull: false},
+      clay: {type: Sequelize.INTEGER, defaultValue: 0, allowNull: false},
+      iron: {type: Sequelize.INTEGER, defaultValue: 0, allowNull: false},
+      harvest: {type: Sequelize.INTEGER, defaultValue: 0, allowNull: false},
+      gold: {type: Sequelize.INTEGER, defaultValue: 0, allowNull: false},
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
