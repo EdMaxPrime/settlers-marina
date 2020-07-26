@@ -5,6 +5,9 @@ import CardList from "../views/CardList";
 import Card from "../views/Card";
 import Collapsible from "./Collapsible";
 import settlement from "../../images/settlement.png";
+import city from "../../images/city.png";
+import road from "../../images/road.png";
+import ship from "../../images/shipping.png";
 
 import {amIPlaying, filterMyPlayer} from "../../selectors";
 import {setAction} from "../../actions";
@@ -26,17 +29,17 @@ class Shop extends Component {
               disabled={this.props.notMyTurn}
               onAction={a? this.props.settlement : this.props.reset} />
         <Card title="City"
-              image={settlement}
+              image={city}
               body="Cost: 3 wood, 2 clay, 4 harvests"
               action="Build"
               onAction={this.props.settlement} />
         <Card title="Road"
-              image={settlement}
+              image={road}
               body="Cost: 3 wood, 2 clay, 4 harvests"
               action="Build"
               onAction={this.props.settlement} />
         <Card title="Shipping Lane"
-              image={settlement}
+              image={ship}
               body="Cost: 3 wood, 2 clay, 4 harvests"
               action="Build"
               onAction={this.props.settlement} />

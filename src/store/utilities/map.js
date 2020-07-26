@@ -279,7 +279,7 @@ function buildingsReducer(state = {}, action) {
 }
 /** Updates map.roads:
  * @param state   map.roads
- * @param action  {type: BUILD, what: Road|Ship, where: Tile*[2], who: Player*}
+ * @param action  {type: Road|Ship, where: Tile*[2], who: Player*}
  * @return  map.roads with an extra property:
  *   key: action.where[0] + "," + action.where[1] 
  *   value: [Player* owner, City|Ship type]
@@ -320,6 +320,7 @@ function possibleReducer(map, action) {
       return illegal.indexOf(intersection) === -1;
     });
   }
+  //if Road, remove in
   else if(action.type === "RESET") {
     changes.settlement = [];
   }
