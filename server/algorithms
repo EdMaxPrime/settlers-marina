@@ -1,0 +1,41 @@
+
+a road segment is defined as a path through the graph until you reach
+an intersection where there is a fork in your OWN road or your road ends
+(connections which are your own != 1)
+
+intersections = {
+	Intersection* : {
+		building: <Player* owner, C|S type> or null,
+		roads: [<Player* owner, R|S type, Intersection* next>]
+	}
+}
+
+longestRoad = 0 //game global
+
+addRoad(road) {
+	let visited = {};
+	int r1 = findLongest(road.a, visited);
+	int r2 = findLongest(road.b, visited);
+	if(r1 + r2 > longestRoad)
+		longestRoad = r1 + r2;
+		!we have a new longest road!
+}
+
+int findLongest(Player p, Intersection start, visited) {
+	if visited or has enemy building
+		return 0
+	int r1, r2, r3 = 0;
+	visited[start] = true;
+	for each of the three connections this intersection has:
+		if road has same owner
+			r[i] = 1 + findLongest(nextIntersection, visited);
+	return max(r1, r2, r3);
+}
+
+addBuilding(settlement s) {
+	//break up longest road?
+	let visited = {s.location};
+	for each of the connections this intersection has:
+		if road has a different owner
+			
+}
