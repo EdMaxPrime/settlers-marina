@@ -1,6 +1,7 @@
 import { combineReducers, applyMiddleware, createStore } from "redux";
 import thunkMiddleware from "redux-thunk";
 import { composeWithDevTools } from "redux-devtools-extension";
+import createSocketMiddleware from "./utilities/socket.io-action-events.js";
 import socket from "../websocket.js";
 
 import * as reducers from "../reducers";
@@ -9,7 +10,8 @@ import * as reducers from "../reducers";
 const reducer = combineReducers(reducers);
 //this is our middleware that changes how redux works
 const middleware = composeWithDevTools(
-	applyMiddleware(thunkMiddleware.withExtraArgument(socket))
+	applyMiddleware(thunkMiddleware.withExtraArgument(socket), 
+		createSocketMiddleware(socket, {}))
 );
 //this is the global Redux store
 const store = createStore(reducer, middleware);
